@@ -18,10 +18,11 @@ import ThemeToggle from "@/components/ThemeToggle";
 import StatCard from "@/components/StatCard";
 import AccountCard from "@/components/AccountCard";
 import TransactionItem from "@/components/TransactionItem";
+import { useTelegram } from "@/hooks/useTelegram";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("Алексей");
+  const { TG, user } = useTelegram();
   
   // Sample account data
   const accounts = [
@@ -84,7 +85,7 @@ export default function Dashboard() {
       <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div>
           <p className="text-muted-foreground text-sm">Привет,</p>
-          <h1 className="text-xl font-semibold">{userName}</h1>
+          <h1 className="text-xl font-semibold">{user}</h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" className="rounded-full relative">
