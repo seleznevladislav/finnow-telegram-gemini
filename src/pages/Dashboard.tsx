@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Bell, 
@@ -23,6 +23,11 @@ import { useTelegram } from "@/hooks/useTelegram";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { TG, user } = useTelegram();
+
+  useEffect(() => {
+	TG.ready();
+	TG.expand();
+}, []);
   
   // Sample account data
   const accounts = [
