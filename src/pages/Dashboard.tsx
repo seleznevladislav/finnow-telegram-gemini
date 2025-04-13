@@ -83,7 +83,7 @@ export default function Dashboard() {
       <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div>
           <p className="text-muted-foreground text-sm">Привет,</p>
-          <h1 className="text-xl font-semibold">{user}</h1>
+          <h1 className="text-xl font-semibold">{user?.first_name}</h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" className="rounded-full relative">
