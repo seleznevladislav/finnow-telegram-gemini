@@ -23,7 +23,7 @@ export default function Accounts() {
     {
       id: "1",
       name: "Основная карта",
-      bankName: "Тинькофф",
+      bankName: "Альфа-Банк",
       balance: 84590,
       currency: "₽",
       lastDigits: "4567",
@@ -39,7 +39,7 @@ export default function Accounts() {
     {
       id: "3",
       name: "Кредитная карта",
-      bankName: "Альфа-Банк",
+      bankName: "Т-Банк",
       balance: 45000,
       currency: "₽",
       lastDigits: "1234",
@@ -55,7 +55,7 @@ export default function Accounts() {
     {
       id: "5",
       name: "Валютный счет",
-      bankName: "Тинькофф",
+      bankName: "Т-Банк",
       balance: 2500,
       currency: "$",
     }

@@ -22,7 +22,7 @@ export default function Transactions() {
           date: new Date(2025, 3, 12), // April 12, 2025
           category: "Продукты",
           type: "expense" as const,
-          account: "Тинькофф •4567"
+          account: "Альфа-Банк •4567"
         },
         {
           id: "t2",
@@ -32,7 +32,7 @@ export default function Transactions() {
           date: new Date(2025, 3, 12),
           category: "Транспорт",
           type: "expense" as const,
-          account: "Тинькофф •4567"
+          account: "Альфа-Банк •4567"
         }
       ]
     },
@@ -47,7 +47,7 @@ export default function Transactions() {
           date: new Date(2025, 3, 11),
           category: "Рестораны",
           type: "expense" as const,
-          account: "Тинькофф •4567"
+          account: "Альфа-Банк •4567"
         },
         {
           id: "t4",
@@ -57,7 +57,7 @@ export default function Transactions() {
           date: new Date(2025, 3, 11),
           category: "Подписки",
           type: "expense" as const,
-          account: "Альфа-Банк •1234"
+          account: "Т-Банк •1234"
         }
       ]
     },
@@ -155,7 +155,7 @@ export default function Transactions() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все счета</SelectItem>
-                <SelectItem value="1">Тинькофф •4567</SelectItem>
+                <SelectItem value="1">Альфа-Банк •4567</SelectItem>
                 <SelectItem value="2">Сбербанк •7890</SelectItem>
                 <SelectItem value="3">Альфа-Банк •1234</SelectItem>
               </SelectContent>

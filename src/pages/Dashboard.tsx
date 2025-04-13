@@ -28,7 +28,7 @@ export default function Dashboard() {
     {
       id: "1",
       name: "Основная карта",
-      bankName: "Тинькофф",
+      bankName: "Альфа-Банк",
       balance: 84590,
       currency: "₽",
       lastDigits: "4567",
@@ -54,7 +54,7 @@ export default function Dashboard() {
       date: new Date(2025, 3, 12), // April 12, 2025
       category: "Продукты",
       type: "expense" as const,
-      account: "Тинькофф •4567"
+      account: "Альфа-Банк •4567"
     },
     {
       id: "t2",
@@ -74,7 +74,7 @@ export default function Dashboard() {
       date: new Date(2025, 3, 11), // April 11, 2025
       category: "Рестораны",
       type: "expense" as const,
-      account: "Тинькофф •4567"
+      account: "Альфа-Банк •4567"
     }
   ];
   
