@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Financial app specific colors
+				success: '#10B981',
+				warning: '#F59E0B',
+				error: '#EF4444',
+				info: '#3B82F6',
+				finance: {
+					blue: '#4F6AF0',
+					purple: '#8B5CF6',
+					green: '#10B981',
+					red: '#EF4444',
+					yellow: '#F59E0B',
 				}
 			},
 			borderRadius: {
@@ -84,11 +97,37 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						transform: 'translateY(100%)'
+					},
+					'100%': {
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-up': 'slide-up 0.3s ease-out'
+			},
+			boxShadow: {
+				'neumorph': '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff',
+				'neumorph-dark': '5px 5px 10px #13151a, -5px -5px 10px #272a31',
+				'neumorph-inset': 'inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff',
+				'neumorph-inset-dark': 'inset 3px 3px 6px #13151a, inset -3px -3px 6px #272a31',
 			}
 		}
 	},
