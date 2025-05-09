@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
+import AccountDetail from "./pages/AccountDetail";
 import Transactions from "./pages/Transactions";
 import Analytics from "./pages/Analytics";
 import BottomNavigation from "./components/BottomNavigation";
@@ -23,15 +24,13 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
+            <Route path="/accounts/:id" element={<AccountDetail />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/analytics" element={<Analytics />} />
             
-            {/* Redirect any account routes back to /accounts */}
-            <Route path="/accounts/:id" element={<Navigate to="/accounts" replace />} />
-            
             {/* Add redirects for invalid routes */}
             <Route path="/404" element={<NotFound />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <BottomNavigation />
         </div>

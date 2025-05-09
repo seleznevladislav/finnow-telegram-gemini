@@ -10,9 +10,11 @@ interface AccountCardProps {
   lastDigits?: string;
   color?: string;
   onClick?: () => void;
+  id: string;
 }
 
 export default function AccountCard({
+  id,
   name,
   bankName,
   balance,

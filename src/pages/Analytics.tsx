@@ -8,7 +8,11 @@ import {
   BarChart2, 
   LineChart,
   ChevronDown,
-  Download
+  Download,
+  AlertTriangle,
+  Lightbulb,
+  TrendingDown,
+  Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -146,6 +150,31 @@ export default function Analytics() {
           </div>
         </div>
         
+        {/* Recommendations */}
+        <div className="mb-6">
+          <h3 className="font-medium mb-3">Рекомендации</h3>
+          <div className="neumorph p-5 mb-3">
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="text-sm font-medium">Оптимизируйте расходы на рестораны</h4>
+              <AlertTriangle size={24} className="text-finance-yellow shrink-0 ml-2" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ваши расходы на рестораны составляют <span className="highlight-text">8,400 ₽</span>, что на <span className="highlight-text">15%</span> выше среднего. 
+              Рассмотрите возможность готовить дома чаще.
+            </p>
+          </div>
+          <div className="neumorph p-5">
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="text-sm font-medium">Налоговый вычет</h4>
+              <Lightbulb size={24} className="text-finance-green shrink-0 ml-2" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Вы имеете право на налоговый вычет за медицинские услуги. 
+              Потенциальная экономия: <span className="highlight-text">7,800 ₽</span>.
+            </p>
+          </div>
+        </div>
+        
         {/* Analytics Tabs */}
         <Tabs defaultValue="expenses" className="mb-6">
           <TabsList className="grid grid-cols-3 mb-4">
@@ -277,25 +306,6 @@ export default function Analytics() {
             </div>
           </TabsContent>
         </Tabs>
-        
-        {/* Recommendations */}
-        <div>
-          <h3 className="font-medium mb-3">Рекомендации</h3>
-          <div className="neumorph p-4 mb-3">
-            <h4 className="text-sm font-medium">Оптимизируйте расходы на рестораны</h4>
-            <p className="text-xs text-muted-foreground mt-1">
-              Ваши расходы на рестораны составляют 8,400 ₽, что на 15% выше среднего. 
-              Рассмотрите возможность готовить дома чаще.
-            </p>
-          </div>
-          <div className="neumorph p-4">
-            <h4 className="text-sm font-medium">Налоговый вычет</h4>
-            <p className="text-xs text-muted-foreground mt-1">
-              Вы имеете право на налоговый вычет за медицинские услуги. 
-              Потенциальная экономия: 7,800 ₽.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
