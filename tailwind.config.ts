@@ -124,10 +124,10 @@ export default {
 				'slide-up': 'slide-up 0.3s ease-out'
 			},
 			boxShadow: {
-				'neumorph': '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff',
-				'neumorph-dark': '5px 5px 10px #13151a, -5px -5px 10px #272a31',
-				'neumorph-inset': 'inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff',
-				'neumorph-inset-dark': 'inset 3px 3px 6px #13151a, inset -3px -3px 6px #272a31',
+				'neumorph': '3px 3px 6px rgba(0,0,0,0.1), -3px -3px 6px rgba(255,255,255,0.7)',
+				'neumorph-dark': '3px 3px 6px rgba(0,0,0,0.3), -3px -3px 6px rgba(255,255,255,0.05)',
+				'neumorph-inset': 'inset 2px 2px 5px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(255,255,255,0.7)',
+				'neumorph-inset-dark': 'inset 2px 2px 5px rgba(0,0,0,0.3), inset -2px -2px 5px rgba(255,255,255,0.05)',
 			}
 		}
 	},
