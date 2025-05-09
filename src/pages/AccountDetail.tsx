@@ -93,11 +93,26 @@ export default function AccountDetail() {
         )}
       </div>
       
-      {/* Card Visual */}
-      <div className="absolute top-20 right-3">
-        <div className="bg-red-600 rounded-lg w-24 h-32 flex flex-col justify-between p-3">
-          <div className="text-2xl font-bold text-center text-black">A</div>
-          <div className="text-sm text-center text-black">{cardNumber}</div>
+      {/* Card Visual - with animation and dark theme */}
+      <div className="absolute top-20 right-[-80px] animate-slide-in-right">
+        <div className="bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] rounded-lg w-32 h-48 flex flex-col justify-between p-3 shadow-lg overflow-hidden relative">
+          {/* Card Logo */}
+          <div className="h-12 flex justify-center items-center">
+            <img 
+              src="/lovable-uploads/db341864-dca3-4169-8d9d-9a47f75d9e8d.png" 
+              alt="Card Logo" 
+              className="w-16 h-auto object-contain"
+            />
+          </div>
+          
+          {/* Card Number */}
+          <div className="text-sm text-center text-white/80 font-mono mt-auto">
+            •••• •••• •••• {cardNumber}
+          </div>
+          
+          {/* Decorative Elements */}
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-red-500/20 blur-xl"></div>
+          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-red-600/10 blur-xl"></div>
         </div>
       </div>
       
