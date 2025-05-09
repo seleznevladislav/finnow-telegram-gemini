@@ -13,6 +13,7 @@ interface Account {
   currency: string;
   lastDigits?: string;
   cardType?: string;
+  type?: 'card' | 'account';
 }
 
 export default function AccountDetail() {
@@ -34,6 +35,7 @@ export default function AccountDetail() {
           currency: "₽",
           lastDigits: "4567",
           color: "bg-gradient-to-r from-finance-blue to-finance-purple",
+		  type: 'card',
         },
         {
           id: "2",
@@ -42,6 +44,7 @@ export default function AccountDetail() {
           balance: 125000,
           currency: "₽",
           color: "bg-gradient-to-r from-finance-green to-finance-blue",
+		  type: 'account'
         }
       ];
       
@@ -73,7 +76,7 @@ export default function AccountDetail() {
   return (
     <div className="pb-20 bg-background min-h-screen">
       {/* Header */}
-      <div className="p-4">
+      <div className="p-4 h-[220px]">
         <Button 
           variant="ghost" 
           size="icon"
@@ -85,19 +88,27 @@ export default function AccountDetail() {
         
         {/* Account Info */}
         <h1 className="text-xl font-medium">{account.name}</h1>
+		{account.type == 'account' && (
+			<>
+			  <p className="text-muted-foreground text-xs">на минимальный остаток</p>
+			</>
+        )}
         <div className="mt-4 mb-2">
           <p className="text-4xl font-semibold">{account.balance.toLocaleString().replace(',', ' ')} {account.currency}</p>
         </div>
         {account.lastDigits && (
-          <p className="text-muted-foreground">К счёту привязана карта</p>
+			<>
+			  <p className="text-muted-foreground">К счёту привязана карта</p>
+			</>
         )}
+		 
       </div>
       
       {/* Card Visual - with animation and dark theme */}
-      <div className="absolute top-20 right-[-80px] animate-slide-in-right">
-        <div className="bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] rounded-lg w-32 h-48 flex flex-col justify-between p-3 shadow-lg overflow-hidden relative">
+      <div className="absolute top-20 right-[-30px] animate-slide-in-right">
+        <div className="bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] rounded-lg w-32 h-40 flex flex-col justify-between p-3 shadow-lg overflow-hidden relative">
           {/* Card Logo */}
-          <div className="h-12 flex justify-center items-center">
+          <div className="h-12 flex items-center">
             <img 
               src="/lovable-uploads/db341864-dca3-4169-8d9d-9a47f75d9e8d.png" 
               alt="Card Logo" 
@@ -106,8 +117,8 @@ export default function AccountDetail() {
           </div>
           
           {/* Card Number */}
-          <div className="text-sm text-center text-white/80 font-mono mt-auto">
-            •••• •••• •••• {cardNumber}
+          <div className="text-sm pl-3 text-white/80 font-mono mt-auto">
+            {cardNumber}
           </div>
           
           {/* Decorative Elements */}

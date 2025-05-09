@@ -20,7 +20,7 @@
     --secondary: 269 94% 63%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 210 40% 80%;
     --muted-foreground: 215 16% 47%;
 
     --accent: 210 40% 96.1%;
@@ -52,7 +52,7 @@
     --secondary: 269 94% 63%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 17%;
+    --muted: 217 33% 25%;
     --muted-foreground: 215 20% 65%;
 
     --accent: 217 33% 17%;
@@ -81,7 +81,7 @@
 
 @layer components {
   .neumorph {
-    @apply bg-gray-200 rounded-2xl;
+    @apply bg-background/80 rounded-2xl;
   }
   
   .neumorph-inset {
@@ -89,7 +89,7 @@
   }
   
   .financial-card {
-    @apply bg-gray-200 p-4 transition-all duration-200 hover:translate-y-[-2px] rounded-2xl;
+    @apply bg-muted/10 p-4 transition-all duration-200 hover:translate-y-[-2px] rounded-2xl;
   }
   
   .bottom-sheet {
@@ -105,7 +105,7 @@
   }
   
   .account-action-btn {
-    @apply flex items-center gap-2 w-full p-4 rounded-2xl bg-muted/80 text-foreground text-left;
+    @apply flex items-center gap-2 w-full p-4 rounded-2xl bg-muted/20 text-foreground text-left;
   }
 }
 

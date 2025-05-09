@@ -12,13 +12,11 @@ export default function BottomNavigation() {
   return (
     <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t border-border flex items-center justify-around px-2 z-40">
       <Link to="/" className={`flex flex-col items-center justify-center w-16 py-1 ${isActive('/') ? 'text-primary' : 'text-muted-foreground'}`}>
-        <Home size={24} />
-        <span className="text-xs mt-1">Главная</span>
+        <Home size={30} />
       </Link>
       
       <Link to="/accounts" className={`flex flex-col items-center justify-center w-16 py-1 ${isActive('/accounts') ? 'text-primary' : 'text-muted-foreground'}`}>
-        <CreditCard size={24} />
-        <span className="text-xs mt-1">Счета</span>
+        <CreditCard size={30} />
       </Link>
       
       <div className="relative -mt-8">
@@ -28,13 +26,11 @@ export default function BottomNavigation() {
       </div>
       
       <Link to="/transactions" className={`flex flex-col items-center justify-center w-16 py-1 ${isActive('/transactions') ? 'text-primary' : 'text-muted-foreground'}`}>
-        <List size={24} />
-        <span className="text-xs mt-1">Операции</span>
+        <List size={30} />
       </Link>
       
       <Link to="/analytics" className={`flex flex-col items-center justify-center w-16 py-1 ${isActive('/analytics') ? 'text-primary' : 'text-muted-foreground'}`}>
-        <BarChart2 size={24} />
-        <span className="text-xs mt-1">Аналитика</span>
+        <BarChart2 size={30} />
       </Link>
     </div>
   );
