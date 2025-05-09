@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,14 +19,18 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="max-w-md mx-auto min-h-screen pb-16">
+        <div
+          className={`max-w-md mx-auto min-h-screen pb-16 ${
+            Telegram.WebApp.isFullscreen && "pt-16"
+          }`}
+        >
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/accounts/:id" element={<AccountDetail />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/analytics" element={<Analytics />} />
-            
+
             {/* Add redirects for invalid routes */}
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/" replace />} />
