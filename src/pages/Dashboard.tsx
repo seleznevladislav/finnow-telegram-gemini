@@ -25,7 +25,7 @@ export default function Dashboard() {
 
   useEffect(() => {
 	TG.ready();
-	TG.expand();
+	TG.requestFullscreen();
 }, []);
 
   // Sample account data
