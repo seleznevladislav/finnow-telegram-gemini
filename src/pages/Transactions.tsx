@@ -70,7 +70,7 @@ export default function Transactions() {
           amount: 85000,
           currency: "₽",
           date: new Date(2025, 3, 10),
-          category: "Доход",
+          category: "Пополнения",
           type: "income" as const,
           account: "Сбербанк •7890"
         },

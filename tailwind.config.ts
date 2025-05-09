@@ -73,6 +73,7 @@ export default {
           green: "#10B981",
           red: "#EF4444",
           yellow: "#F59E0B",
+          white: "#FFFFFF",
         },
       },
       borderRadius: {
@@ -115,7 +116,7 @@ export default {
             transform: "translateY(0)",
           },
         },
-        "slide-in-right": {
+        "fly-in-tilt": {
           "0%": {
             transform: "translateX(150%) rotateZ(12deg) scale(0.8)",
             opacity: "0",
@@ -131,14 +132,24 @@ export default {
             transform: "translateX(0) rotateZ(0deg) scale(1)",
           },
         },
+        "icon-pop": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0.8) translateY(6px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "scale(1) translateY(0)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
-        "slide-in-right":
-          "slide-in-right 1s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+        "fly-in-tilt": "fly-in-tilt 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
+        "icon-pop": "icon-pop 0.4s ease-out both",
       },
     },
   },

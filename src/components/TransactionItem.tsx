@@ -25,7 +25,6 @@ export default function TransactionItem({
   currency,
   date,
   category,
-  merchant,
   type,
   account,
   onClick,
@@ -47,8 +46,6 @@ export default function TransactionItem({
     switch (type) {
       case "income":
         return "text-finance-green";
-      case "expense":
-        return "text-finance-red";
       default:
         return "";
     }
@@ -69,10 +66,8 @@ export default function TransactionItem({
           {getIcon()}
         </div>
         <div>
-          <h3 className="font-medium text-sm">{title}</h3>
+          <h3 className="text-sm">{title}</h3>
           <div className="flex items-center text-xs text-muted-foreground mt-1">
-            <Calendar size={12} className="mr-1" />
-            <span>{formattedDate}</span>
             {account && (
               <>
                 <span className="mx-1">•</span>
@@ -83,7 +78,7 @@ export default function TransactionItem({
         </div>
       </div>
       <div className={`text-right ${getAmountColor()}`}>
-        <p className="font-semibold">
+        <p>
           {type === "expense" ? "-" : type === "income" ? "+" : ""}
           {amount.toLocaleString()} {currency}
         </p>

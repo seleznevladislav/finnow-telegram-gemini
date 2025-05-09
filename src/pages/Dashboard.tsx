@@ -1,16 +1,15 @@
-
 import { useNavigate } from "react-router-dom";
-import { 
-  Bell, 
-  ChevronRight, 
-  CreditCard, 
-  Plus, 
-  Search, 
+import {
+  Bell,
+  ChevronRight,
+  CreditCard,
+  Plus,
+  Search,
   Wallet,
   DollarSign,
   ArrowUpDown,
   BarChart2,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -23,7 +22,7 @@ import { useEffect } from "react";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useTelegram();
-  
+
   // Вывод данных о пользователе в консоль (для отладки)
   useEffect(() => {
     if (user) {
@@ -32,7 +31,7 @@ export default function Dashboard() {
       console.log("Telegram user data not available");
     }
   }, [user]);
-  
+
   // Sample account data
   const accounts = [
     {
@@ -51,9 +50,9 @@ export default function Dashboard() {
       balance: 125000,
       currency: "₽",
       color: "bg-gradient-to-r from-finance-green to-finance-blue",
-    }
+    },
   ];
-  
+
   // Sample recent transactions
   const recentTransactions = [
     {
@@ -64,7 +63,7 @@ export default function Dashboard() {
       date: new Date(2025, 3, 12), // April 12, 2025
       category: "Продукты",
       type: "expense" as const,
-      account: "Альфа-Банк •4567"
+      account: "Альфа-Банк •4567",
     },
     {
       id: "t2",
@@ -72,9 +71,9 @@ export default function Dashboard() {
       amount: 85000,
       currency: "₽",
       date: new Date(2025, 3, 10), // April 10, 2025
-      category: "Доход",
+      category: "Пополнения",
       type: "income" as const,
-      account: "Сбербанк •7890"
+      account: "Сбербанк •7890",
     },
     {
       id: "t3",
@@ -84,13 +83,13 @@ export default function Dashboard() {
       date: new Date(2025, 3, 11), // April 11, 2025
       category: "Рестораны",
       type: "expense" as const,
-      account: "Альфа-Банк •4567"
-    }
+      account: "Альфа-Банк •4567",
+    },
   ];
-  
+
   // Получаем имя пользователя из Telegram или используем запасной вариант
   const userName = user?.first_name || "Пользователь";
-  
+
   return (
     <div className="pb-20">
       {/* Header */}
@@ -107,31 +106,31 @@ export default function Dashboard() {
           <ThemeToggle />
         </div>
       </div>
-      
+
       {/* Main content */}
       <div className="p-4 animate-fade-in">
         {/* Search */}
         <div className="mb-6">
-          <div className="neumorph-inset flex items-center px-4 py-2">
+          <div className="flex items-center px-4 py-2 rounded-xl bg-muted/20 shadow-sm transition focus-within:ring-2 focus-within:ring-primary">
             <Search size={18} className="text-muted-foreground mr-2" />
-            <input 
-              type="text" 
-              placeholder="Поиск транзакций, счетов..." 
+            <input
+              type="text"
+              placeholder="Поиск транзакций, счетов..."
               className="bg-transparent border-none outline-none w-full text-sm placeholder:text-muted-foreground"
             />
           </div>
         </div>
-        
+
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <StatCard 
+          <StatCard
             title="Баланс"
             value={209590}
             currency="₽"
             change={5.2}
             icon={<Wallet size={18} className="text-primary" />}
           />
-          <StatCard 
+          <StatCard
             title="Расходы (Апр.)"
             value={43250}
             currency="₽"
@@ -139,60 +138,60 @@ export default function Dashboard() {
             icon={<DollarSign size={18} className="text-finance-red" />}
           />
         </div>
-        
+
         {/* Quick Actions */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 neumorph flex items-center justify-center rounded-full mb-1">
+            <div className="w-12 h-12 bg-muted/30 flex items-center justify-center rounded-full mb-1">
               <ArrowUpDown size={20} className="text-finance-blue" />
             </div>
             <span className="text-xs">Перевод</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 neumorph flex items-center justify-center rounded-full mb-1">
+            <div className="w-12 h-12 bg-muted/30 flex items-center justify-center rounded-full mb-1">
               <CreditCard size={20} className="text-finance-purple" />
             </div>
             <span className="text-xs">Оплата</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 neumorph flex items-center justify-center rounded-full mb-1">
+            <div className="w-12 h-12 bg-muted/30 flex items-center justify-center rounded-full mb-1">
               <BarChart2 size={20} className="text-finance-green" />
             </div>
             <span className="text-xs">Отчеты</span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 neumorph flex items-center justify-center rounded-full mb-1">
+            <div className="w-12 h-12 bg-muted/30 flex items-center justify-center rounded-full mb-1">
               <Calendar size={20} className="text-finance-yellow" />
             </div>
             <span className="text-xs">Платежи</span>
           </div>
         </div>
-        
+
         {/* Accounts */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold">Мои счета</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="text-primary"
-              onClick={() => navigate('/accounts')}
+              onClick={() => navigate("/accounts")}
             >
               <span>Все</span>
               <ChevronRight size={16} />
             </Button>
           </div>
-          
+
           <div className="space-y-3">
             {accounts.map((account) => (
-              <AccountCard 
+              <AccountCard
                 key={account.id}
                 {...account}
                 onClick={() => navigate(`/accounts/${account.id}`)}
               />
             ))}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full neumorph flex items-center justify-center py-6"
             >
               <Plus size={18} className="mr-2" />
@@ -200,25 +199,25 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
-        
+
         {/* Recent Transactions */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold">Последние операции</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="text-primary"
-              onClick={() => navigate('/transactions')}
+              onClick={() => navigate("/transactions")}
             >
               <span>Все</span>
               <ChevronRight size={16} />
             </Button>
           </div>
-          
+
           <div className="neumorph overflow-hidden rounded-2xl">
             {recentTransactions.map((transaction) => (
-              <TransactionItem 
+              <TransactionItem
                 key={transaction.id}
                 {...transaction}
                 onClick={() => navigate(`/transactions/${transaction.id}`)}
