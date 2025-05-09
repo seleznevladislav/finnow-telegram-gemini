@@ -21,16 +21,12 @@ import { useEffect } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useTelegram();
+  const { TG, user } = useTelegram();
 
-  // Вывод данных о пользователе в консоль (для отладки)
   useEffect(() => {
-    if (user) {
-      console.log("Telegram user data:", user);
-    } else {
-      console.log("Telegram user data not available");
-    }
-  }, [user]);
+	TG.ready();
+	TG.expand();
+}, []);
 
   // Sample account data
   const accounts = [
@@ -87,7 +83,6 @@ export default function Dashboard() {
     },
   ];
 
-  // Получаем имя пользователя из Telegram или используем запасной вариант
   const userName = user?.first_name || "Пользователь";
 
   return (
