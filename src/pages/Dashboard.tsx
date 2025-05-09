@@ -24,9 +24,14 @@ export default function Dashboard() {
   const { TG, user } = useTelegram();
 
   useEffect(() => {
-	TG.ready();
-	TG.requestFullscreen();
-}, []);
+    TG.ready();
+    TG.requestFullscreen();
+
+    const container = document.querySelector(".routeContainer");
+    if (container) {
+      container.classList.add("pt-16");
+    }
+  }, []);
 
   // Sample account data
   const accounts = [
