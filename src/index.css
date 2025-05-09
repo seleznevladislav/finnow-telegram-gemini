@@ -81,15 +81,15 @@
 
 @layer components {
   .neumorph {
-    @apply bg-gray-100/80 rounded-2xl border border-background/50;
+    @apply bg-gray-200 rounded-2xl;
   }
   
   .neumorph-inset {
-    @apply bg-gray-200/80 rounded-2xl border border-background/50;
+    @apply bg-gray-200 rounded-2xl;
   }
   
   .financial-card {
-    @apply bg-gray-100/70 p-4 transition-all duration-200 hover:translate-y-[-2px] rounded-2xl border border-background/50;
+    @apply bg-gray-200 p-4 transition-all duration-200 hover:translate-y-[-2px] rounded-2xl;
   }
   
   .bottom-sheet {
@@ -105,6 +105,6 @@
   }
   
   .account-action-btn {
-    @apply flex items-center gap-2 w-full p-4 rounded-2xl bg-gray-800/80 text-white text-left;
+    @apply flex items-center gap-2 w-full p-4 rounded-2xl bg-muted/80 text-foreground text-left;
   }
 }
