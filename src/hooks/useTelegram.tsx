@@ -1,4 +1,13 @@
+
 import { useEffect } from "react";
+
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: any;
+    }
+  }
+}
 
 export function useTelegram() {
 	const TG = typeof window !== 'undefined' && window.Telegram?.WebApp;

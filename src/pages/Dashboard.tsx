@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { 
   Bell, 
@@ -17,10 +18,20 @@ import StatCard from "@/components/StatCard";
 import AccountCard from "@/components/AccountCard";
 import TransactionItem from "@/components/TransactionItem";
 import { useTelegram } from "@/hooks/useTelegram";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { TG, user } = useTelegram();
+  const { user } = useTelegram();
+  
+  // Вывод данных о пользователе в консоль (для отладки)
+  useEffect(() => {
+    if (user) {
+      console.log("Telegram user data:", user);
+    } else {
+      console.log("Telegram user data not available");
+    }
+  }, [user]);
   
   // Sample account data
   const accounts = [
@@ -77,13 +88,16 @@ export default function Dashboard() {
     }
   ];
   
+  // Получаем имя пользователя из Telegram или используем запасной вариант
+  const userName = user?.first_name || "Пользователь";
+  
   return (
     <div className="pb-20">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div>
           <p className="text-muted-foreground text-sm">Привет,</p>
-          <h1 className="text-xl font-semibold">{user?.first_name || "Алексей"}</h1>
+          <h1 className="text-xl font-semibold">{userName}</h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" className="rounded-full relative">
