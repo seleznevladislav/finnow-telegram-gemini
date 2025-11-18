@@ -1,18 +1,20 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  ChevronLeft, 
-  Plus, 
-  Wallet, 
-  CreditCard, 
-  DollarSign, 
+import {
+  ChevronLeft,
+  Plus,
+  Wallet,
+  CreditCard,
+  DollarSign,
   PiggyBank,
   Search,
-  Filter
+  Filter,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AccountCard from "@/components/AccountCard";
+import TransactionItem from "@/components/TransactionItem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Accounts() {
@@ -63,11 +65,80 @@ export default function Accounts() {
   
   const totalBalance = accounts.reduce((sum, account) => {
     // Simplified conversion for the example (assuming $1 = ₽90)
-    const convertedAmount = account.currency === "$" 
-      ? account.balance * 90 
+    const convertedAmount = account.currency === "$"
+      ? account.balance * 90
       : account.balance;
     return sum + convertedAmount;
   }, 0);
+
+  // Sample transaction data grouped by date
+  const transactionsByDate = [
+    {
+      date: "12 апреля 2025",
+      transactions: [
+        {
+          id: "t1",
+          title: "Супермаркет Перекресток",
+          amount: 2450,
+          currency: "₽",
+          date: new Date(2025, 3, 12),
+          category: "Продукты",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
+        },
+        {
+          id: "t2",
+          title: "АЗС Газпромнефть",
+          amount: 1800,
+          currency: "₽",
+          date: new Date(2025, 3, 12),
+          category: "Транспорт",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
+        }
+      ]
+    },
+    {
+      date: "11 апреля 2025",
+      transactions: [
+        {
+          id: "t3",
+          title: "Кафе Брускетта",
+          amount: 1240,
+          currency: "₽",
+          date: new Date(2025, 3, 11),
+          category: "Рестораны",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
+        },
+        {
+          id: "t4",
+          title: "Netflix",
+          amount: 799,
+          currency: "₽",
+          date: new Date(2025, 3, 11),
+          category: "Подписки",
+          type: "expense" as const,
+          account: "Т-Банк •1234"
+        }
+      ]
+    },
+    {
+      date: "10 апреля 2025",
+      transactions: [
+        {
+          id: "t5",
+          title: "Зарплата",
+          amount: 85000,
+          currency: "₽",
+          date: new Date(2025, 3, 10),
+          category: "Пополнения",
+          type: "income" as const,
+          account: "Сбербанк •7890"
+        }
+      ]
+    }
+  ];
   
   return (
     <div className="pb-20">
@@ -132,11 +203,12 @@ export default function Accounts() {
         
         {/* Account Tabs */}
         <Tabs defaultValue="all" className="mb-6">
-          <TabsList className="grid grid-cols-4 mb-4">
+          <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="all">Все</TabsTrigger>
             <TabsTrigger value="cards">Карты</TabsTrigger>
             <TabsTrigger value="accounts">Счета</TabsTrigger>
             <TabsTrigger value="investments">Инвест.</TabsTrigger>
+            <TabsTrigger value="history">История</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="space-y-3">
@@ -177,12 +249,31 @@ export default function Accounts() {
             {accounts
               .filter(account => account.name === "Инвестиционный счет")
               .map((account) => (
-                <AccountCard 
+                <AccountCard
                   key={account.id}
                   {...account}
                   onClick={() => navigate(`/accounts/${account.id}`)}
                 />
               ))}
+          </TabsContent>
+
+          <TabsContent value="history">
+            <div>
+              {transactionsByDate.map((group) => (
+                <div key={group.date} className="mb-4">
+                  <h2 className="font-medium text-sm mb-2">{group.date}</h2>
+                  <div className="neumorph overflow-hidden rounded-2xl">
+                    {group.transactions.map((transaction) => (
+                      <TransactionItem
+                        key={transaction.id}
+                        {...transaction}
+                        onClick={() => {}}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
         

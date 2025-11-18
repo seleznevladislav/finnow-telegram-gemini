@@ -1,4 +1,4 @@
-import { Home, CreditCard, BarChart2, List, PlusCircle } from "lucide-react";
+import { Home, CreditCard, BarChart2, MessageSquare, PlusCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useTelegram } from "@/hooks/useTelegram";
 
@@ -50,13 +50,13 @@ export default function BottomNavigation() {
       </div>
 
       <Link
-        to="/transactions"
+        to="/chat"
         onClick={vibrate}
         className={`flex flex-col items-center justify-center w-16 py-1 ${
-          isActive("/transactions") ? "text-primary" : "text-muted-foreground"
+          isActive("/chat") ? "text-primary" : "text-muted-foreground"
         }`}
       >
-        <List size={32} />
+        <MessageSquare size={32} />
       </Link>
 
       <Link

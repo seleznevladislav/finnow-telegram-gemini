@@ -10,6 +10,7 @@ import Accounts from "./pages/Accounts";
 import AccountDetail from "./pages/AccountDetail";
 import Transactions from "./pages/Transactions";
 import Analytics from "./pages/Analytics";
+import Chat from "./pages/Chat";
 import BottomNavigation from "./components/BottomNavigation";
 
 const queryClient = new QueryClient();
@@ -27,7 +28,8 @@ const App = () => (
             <Route path="/accounts/:id" element={<AccountDetail />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/analytics" element={<Analytics />} />
-            
+            <Route path="/chat" element={<Chat />} />
+
             {/* Add redirects for invalid routes */}
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/" replace />} />
