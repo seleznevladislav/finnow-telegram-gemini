@@ -120,24 +120,53 @@ export const getChatResponse = async (
   conversationHistory: Message[]
 ): Promise<string> => {
   try {
-    // Используем бесплатный Hugging Face Inference API
-    const HF_API_KEY = import.meta.env.VITE_HF_API_KEY || "hf_demo_key"; // Заглушка для dev
-    const HF_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"; // Бесплатная модель
+    // Используем Hugging Face Inference API
+    const HF_API_KEY = import.meta.env.VITE_HF_API_KEY || "hf_demo_key";
+    const HF_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1";
 
-    // Если API ключ не настроен, используем fallback с простой логикой
-    if (HF_API_KEY === "hf_demo_key") {
+    // Если API ключ не настроен, используем fallback
+    if (HF_API_KEY === "hf_demo_key" || !HF_API_KEY) {
+      console.warn("HF API key not configured, using fallback");
       return getFallbackResponse(userMessage);
     }
 
-    // Формируем историю для контекста
-    const messages = [
-      { role: "system", content: getSystemPrompt() },
-      ...conversationHistory.slice(-5).map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      { role: "user", content: userMessage },
-    ];
+    // Формируем промпт в формате Mixtral Instruct
+    // Формат: <s>[INST] system_prompt + user_message [/INST] assistant_response</s> [INST] user_message [/INST]
+    const systemPrompt = getSystemPrompt();
+
+    let prompt = "";
+
+    // Берем последние 3 сообщения для контекста (не включая welcome)
+    const recentHistory = conversationHistory
+      .filter(msg => msg.id !== "welcome")
+      .slice(-3);
+
+    if (recentHistory.length === 0) {
+      // Первое сообщение - включаем системный промпт
+      prompt = `<s>[INST] ${systemPrompt}\n\n${userMessage} [/INST]`;
+    } else {
+      // Есть история - формируем диалог
+      prompt = "<s>";
+
+      for (let i = 0; i < recentHistory.length; i++) {
+        const msg = recentHistory[i];
+        if (msg.role === "user") {
+          if (i === 0) {
+            // Первое сообщение в истории - добавляем системный промпт
+            prompt += `[INST] ${systemPrompt}\n\n${msg.content} [/INST]`;
+          } else {
+            prompt += `[INST] ${msg.content} [/INST]`;
+          }
+        } else if (msg.role === "assistant") {
+          prompt += ` ${msg.content}</s> `;
+        }
+      }
+
+      // Добавляем текущий вопрос пользователя
+      prompt += `<s>[INST] ${userMessage} [/INST]`;
+    }
+
+    console.log("Sending to HF API:", { model: HF_MODEL, promptLength: prompt.length });
 
     // Запрос к Hugging Face Inference API
     const response = await fetch(
@@ -149,24 +178,27 @@ export const getChatResponse = async (
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: messages
-            .map((m) => `${m.role === "user" ? "User" : m.role === "system" ? "System" : "Assistant"}: ${m.content}`)
-            .join("\n"),
+          inputs: prompt,
           parameters: {
-            max_new_tokens: 300,
+            max_new_tokens: 350,
             temperature: 0.7,
-            top_p: 0.9,
+            top_p: 0.95,
+            repetition_penalty: 1.1,
             return_full_text: false,
+            do_sample: true,
           },
         }),
       }
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`HF API error: ${response.status}`, errorText);
       throw new Error(`HF API error: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("HF API response:", data);
 
     // Извлекаем текст ответа
     let aiResponse = "";
@@ -174,19 +206,47 @@ export const getChatResponse = async (
       aiResponse = data[0].generated_text;
     } else if (data.generated_text) {
       aiResponse = data.generated_text;
+    } else if (data.error) {
+      console.error("HF API error:", data.error);
+      throw new Error(data.error);
     } else {
+      console.error("Unexpected response format:", data);
       throw new Error("Unexpected response format");
     }
 
-    // Очищаем ответ от системных префиксов
+    // Очищаем ответ от тегов и лишнего текста
     aiResponse = aiResponse
-      .replace(/^(System:|User:|Assistant:)/gim, "")
+      .replace(/<s>/g, "")
+      .replace(/<\/s>/g, "")
+      .replace(/\[INST\].*?\[\/INST\]/gs, "")
       .trim();
 
-    return aiResponse || getFallbackResponse(userMessage);
+    if (!aiResponse || aiResponse.length < 3) {
+      console.warn("Empty AI response, using fallback");
+      return getFallbackResponse(userMessage);
+    }
+
+    return aiResponse;
   } catch (error) {
     console.error("AI service error:", error);
     return getFallbackResponse(userMessage);
+  }
+};
+
+// Простой калькулятор для математических выражений
+const calculateMath = (expression: string): number | null => {
+  try {
+    // Убираем пробелы и проверяем, что это математическое выражение
+    const cleaned = expression.replace(/\s/g, '');
+    // Разрешаем только цифры и математические операции
+    if (!/^[0-9+\-*/().]+$/.test(cleaned)) {
+      return null;
+    }
+    // Используем Function вместо eval для безопасности
+    const result = new Function('return ' + cleaned)();
+    return typeof result === 'number' && !isNaN(result) ? result : null;
+  } catch {
+    return null;
   }
 };
 
@@ -194,6 +254,15 @@ export const getChatResponse = async (
 const getFallbackResponse = (userMessage: string): string => {
   const message = userMessage.toLowerCase();
   const context = getUserFinancialContext();
+
+  // Проверяем, не математический ли это вопрос
+  const mathMatch = userMessage.match(/(?:сколько|что|чему равн[оа]|посчитай|вычисли|реши)?\s*(?:будет)?\s*([0-9+\-*/().]+)\s*(?:\?|=)?/i);
+  if (mathMatch && mathMatch[1]) {
+    const result = calculateMath(mathMatch[1]);
+    if (result !== null) {
+      return `🧮 ${mathMatch[1]} = ${result}`;
+    }
+  }
 
   if (
     message.includes("карт") &&

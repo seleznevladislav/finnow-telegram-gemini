@@ -189,7 +189,10 @@ export default function AccountDetail() {
       {/* Account Actions */}
       <div className="bg-background/95 mt-6 rounded-t-3xl p-4 border-t border-muted">
         <div className="space-y-2">
-          <button className="account-action-btn">
+          <button
+            className="account-action-btn"
+            onClick={() => navigate('/transactions')}
+          >
             <History className="text-muted-foreground" size={20} />
             <span className="ml-4">История операций</span>
           </button>

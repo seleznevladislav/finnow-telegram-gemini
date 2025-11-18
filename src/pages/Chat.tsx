@@ -21,20 +21,58 @@ interface Message {
   timestamp: Date;
 }
 
-export default function Chat() {
-  const navigate = useNavigate();
-  const { TG, user } = useTelegram();
-  const [messages, setMessages] = useState<Message[]>([
+const STORAGE_KEY = "finnow_chat_history";
+
+// Загрузка истории из localStorage
+const loadChatHistory = (userName?: string): Message[] => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Восстанавливаем Date объекты
+      return parsed.map((msg: any) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp),
+      }));
+    }
+  } catch (error) {
+    console.error("Error loading chat history:", error);
+  }
+
+  // Возвращаем приветственное сообщение по умолчанию
+  return [
     {
       id: "welcome",
       role: "assistant",
-      content: `Привет, ${user?.first_name || "друг"}! 👋 Я ваш финансовый помощник. Могу помочь с:\n\n• Анализом трат и доходов\n• Советами по оптимизации бюджета\n• Выбором карты для покупок\n• Прогнозом расходов\n\nЗадайте мне любой вопрос!`,
+      content: `Привет, ${userName || "друг"}! 👋 Я ваш финансовый помощник. Могу помочь с:\n\n• Анализом трат и доходов\n• Советами по оптимизации бюджета\n• Выбором карты для покупок\n• Прогнозом расходов\n\nЗадайте мне любой вопрос!`,
       timestamp: new Date(),
     },
-  ]);
+  ];
+};
+
+// Сохранение истории в localStorage
+const saveChatHistory = (messages: Message[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  } catch (error) {
+    console.error("Error saving chat history:", error);
+  }
+};
+
+export default function Chat() {
+  const navigate = useNavigate();
+  const { TG, user } = useTelegram();
+  const [messages, setMessages] = useState<Message[]>(() =>
+    loadChatHistory(user?.first_name)
+  );
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Сохраняем историю при изменении сообщений
+  useEffect(() => {
+    saveChatHistory(messages);
+  }, [messages]);
 
   useEffect(() => {
     TG.ready();
@@ -117,9 +155,9 @@ export default function Chat() {
   ];
 
   return (
-    <div className="pb-20 flex flex-col h-screen">
+    <div className="pb-20 flex flex-col min-h-screen max-h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="flex-shrink-0 sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <Button
             variant="ghost"
@@ -137,7 +175,7 @@ export default function Chat() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {messages.length === 1 && (
           <div className="mb-6">
             <p className="text-sm text-muted-foreground mb-3 text-center">
@@ -219,7 +257,7 @@ export default function Chat() {
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-16 bg-background border-t border-border p-4">
+      <div className="flex-shrink-0 bg-background border-t border-border p-4">
         <div className="flex items-end space-x-2">
           <div className="flex-1 neumorph-inset rounded-2xl px-4 py-2">
             <textarea
@@ -232,7 +270,7 @@ export default function Chat() {
                 }
               }}
               placeholder="Задайте вопрос..."
-              className="bg-transparent border-none outline-none w-full text-sm placeholder:text-muted-foreground resize-none"
+              className="bg-transparent border-none outline-none w-full text-sm text-foreground placeholder:text-foreground/60 resize-none"
               rows={1}
               disabled={isLoading}
             />
