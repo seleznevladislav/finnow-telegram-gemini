@@ -16,16 +16,27 @@ import ThemeToggle from "@/components/ThemeToggle";
 import StatCard from "@/components/StatCard";
 import AccountCard from "@/components/AccountCard";
 import TransactionItem from "@/components/TransactionItem";
+import AIInsightTrigger from "@/components/ai/AIInsightTrigger";
+import AIInsightsSheet from "@/components/ai/AIInsightsSheet";
 import { useTelegram } from "@/hooks/useTelegram";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { TG, user } = useTelegram();
+  const [isAISheetOpen, setIsAISheetOpen] = useState(false);
 
   useEffect(() => {
     TG.ready();
-    TG.requestFullscreen();
+
+    // Безопасный вызов requestFullscreen (не поддерживается в некоторых версиях)
+    if (TG.requestFullscreen && typeof TG.requestFullscreen === 'function') {
+      try {
+        TG.requestFullscreen();
+      } catch (e) {
+        console.log('requestFullscreen not supported');
+      }
+    }
 
     const container = document.querySelector(".routeContainer");
     if (container) {
@@ -90,6 +101,16 @@ export default function Dashboard() {
 
   const userName = user?.first_name || "Пользователь";
 
+  // Расчет доступной суммы для инвестиций
+  const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const monthlyExpenses = 43250; // Из StatCard
+  const obligatoryPayments = 15000; // ЖКХ, связь, подписки
+  const safetyBuffer = 50000; // Резервный фонд
+  const availableForInvestment = Math.max(
+    0,
+    totalBalance - obligatoryPayments - safetyBuffer - monthlyExpenses
+  );
+
   return (
     <div className="pb-20">
       {/* Header */}
@@ -136,6 +157,15 @@ export default function Dashboard() {
             currency="₽"
             change={-2.8}
             icon={<DollarSign size={18} className="text-finance-red" />}
+          />
+        </div>
+
+        {/* AI Insight Trigger */}
+        <div className="mb-6">
+          <AIInsightTrigger
+            savingsAmount={Math.floor(availableForInvestment)}
+            insightText={`После всех обязательных платежей у тебя остается ${Math.floor(availableForInvestment).toLocaleString()}₽ — можно инвестировать для защиты от инфляции`}
+            onClick={() => setIsAISheetOpen(true)}
           />
         </div>
 
@@ -226,6 +256,15 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* AI Insights Bottom Sheet */}
+      <AIInsightsSheet
+        isOpen={isAISheetOpen}
+        onClose={() => setIsAISheetOpen(false)}
+        availableAmount={Math.floor(availableForInvestment)}
+        totalBalance={totalBalance}
+        monthlyExpenses={monthlyExpenses}
+      />
     </div>
   );
 }
