@@ -42,9 +42,8 @@ export default function AIInsightCard({
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles size={14} className={iconColorStyles[variant]} />
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Персональный инсайт
+            	Инсайт
             </span>
           </div>
           <h3 className="font-semibold text-base">{title}</h3>

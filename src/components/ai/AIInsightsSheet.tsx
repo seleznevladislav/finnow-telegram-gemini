@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import InvestmentSuggestion from "./InvestmentSuggestion";
 import SpendingAlert from "./SpendingAlert";
 import SavingOpportunity from "./SavingOpportunity";
+import { useSwipeable } from "react-swipeable";
+import { useState, useEffect } from "react";
 
 interface AIInsightsSheetProps {
   isOpen: boolean;
@@ -19,7 +21,33 @@ export default function AIInsightsSheet({
   totalBalance = 209590,
   monthlyExpenses = 43250,
 }: AIInsightsSheetProps) {
-  if (!isOpen) return null;
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Обработка свайпа вниз для закрытия
+  const handlers = useSwipeable({
+    onSwipedDown: () => {
+      handleClose();
+    },
+    preventScrollOnSwipe: false,
+    trackMouse: false,
+  });
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300);
+  };
+
+  // Сброс состояния при открытии
+  useEffect(() => {
+    if (isOpen) {
+      setIsClosing(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen && !isClosing) return null;
 
   // Расчеты для инвестиций
   const bondPrice = 1050;
@@ -31,14 +59,17 @@ export default function AIInsightsSheet({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 animate-fade-in"
-        onClick={onClose}
+        className={`fixed inset-0 bg-black/50 z-40 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+        onClick={handleClose}
       />
 
       {/* Bottom Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden animate-slide-up">
-        {/* Handle */}
-        <div className="sticky top-0 z-10 bg-background pt-3 pb-2 px-4 border-b border-border">
+      <div
+        {...handlers}
+        className={`fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}
+      >
+        {/* Handle - можно свайпать вниз */}
+        <div className="sticky top-0 z-10 bg-background pt-6 pb-2 px-4 border-b border-border">
           <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-3" />
           <div className="flex items-center justify-between">
             <div>
@@ -50,7 +81,7 @@ export default function AIInsightsSheet({
             <Button
               variant="ghost"
               size="icon"
-              onClick={onClose}
+              onClick={handleClose}
               className="rounded-full"
             >
               <X size={20} />
@@ -59,7 +90,7 @@ export default function AIInsightsSheet({
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(85vh-80px)] custom-scrollbar">
+        <div className="overflow-y-auto max-h-[calc(85vh-96px)] custom-scrollbar">
           <div className="p-4 space-y-4 pb-8">
             {/* Investment Suggestion */}
             <InvestmentSuggestion

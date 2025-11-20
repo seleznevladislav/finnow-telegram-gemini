@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ChevronLeft,
   Plus,
   Wallet,
   CreditCard,
@@ -19,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Accounts() {
   const navigate = useNavigate();
-  
+
   // Sample account data
   const accounts = [
     {
@@ -145,14 +144,6 @@ export default function Accounts() {
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="mr-2"
-            onClick={() => navigate('/')}
-          >
-            <ChevronLeft size={20} />
-          </Button>
           <h1 className="text-xl font-semibold">Счета и карты</h1>
         </div>
         <Button 

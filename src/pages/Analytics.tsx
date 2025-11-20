@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  ChevronLeft,
   Calendar,
   PieChart,
   BarChart2,
@@ -33,7 +31,6 @@ import {
 } from "recharts";
 
 export default function Analytics() {
-  const navigate = useNavigate();
   const [period, setPeriod] = useState("month");
 
   // Sample expense data by category
@@ -78,14 +75,6 @@ export default function Analytics() {
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-2"
-            onClick={() => navigate("/")}
-          >
-            <ChevronLeft size={20} />
-          </Button>
           <h1 className="text-xl font-semibold">Аналитика</h1>
         </div>
         <div className="flex items-center">

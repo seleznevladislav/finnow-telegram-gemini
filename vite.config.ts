@@ -8,6 +8,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Прокси для HuggingFace API чтобы обойти CORS
+      '/api/huggingface': {
+        target: 'https://api-inference.huggingface.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/huggingface/, ''),
+        secure: true,
+      },
+    },
   },
   plugins: [
     react(),

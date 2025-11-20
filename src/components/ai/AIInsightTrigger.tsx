@@ -33,12 +33,12 @@ export default function AIInsightTrigger({
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1">
             <span className="text-xs font-medium text-primary uppercase tracking-wide">
-              Персональный инсайт
+               Рекоммендация
             </span>
-            <span className="text-xs px-2 py-0.5 bg-finance-green/20 text-finance-green rounded-full font-medium">
-              +{savingsAmount.toLocaleString()} ₽
+            <span className="text-xs px-1.5 py-0.5 bg-finance-green/20 text-finance-green rounded-full font-medium whitespace-nowrap">
+              +{savingsAmount.toLocaleString('ru-RU')} ₽
             </span>
           </div>
           <p className="text-sm font-medium leading-snug">

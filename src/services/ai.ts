@@ -1,5 +1,9 @@
 // Hugging Face Inference API для работы с AI моделями
 // Используем бесплатный доступ к ChatGPT-совместимым моделям
+//
+// ВАЖНО: Hugging Face API имеет CORS ограничения при прямых запросах из браузера.
+// Для production необходимо создать бэкенд endpoint, который будет проксировать запросы.
+// Сейчас используется fallback на основе ключевых слов при ошибках CORS.
 
 interface Message {
   role: "user" | "assistant";
@@ -120,58 +124,49 @@ export const getChatResponse = async (
   conversationHistory: Message[]
 ): Promise<string> => {
   try {
-    // Используем Hugging Face Inference API
+    // Используем Finance-Llama-8B - специализированная модель для финансовых вопросов
     const HF_API_KEY = import.meta.env.VITE_HF_API_KEY || "hf_demo_key";
-    const HF_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1";
+    const HF_MODEL = "tarun7r/Finance-Llama-8B";
 
     // Если API ключ не настроен, используем fallback
     if (HF_API_KEY === "hf_demo_key" || !HF_API_KEY) {
-      console.warn("HF API key not configured, using fallback");
+      console.info("💡 HF API key не настроен - используются локальные ответы на основе ключевых слов");
       return getFallbackResponse(userMessage);
     }
 
-    // Формируем промпт в формате Mixtral Instruct
-    // Формат: <s>[INST] system_prompt + user_message [/INST] assistant_response</s> [INST] user_message [/INST]
+    // Формируем промпт для Finance-Llama-8B
     const systemPrompt = getSystemPrompt();
 
-    let prompt = "";
-
-    // Берем последние 3 сообщения для контекста (не включая welcome)
+    // Берем последние 2 сообщения для контекста
     const recentHistory = conversationHistory
       .filter(msg => msg.id !== "welcome")
-      .slice(-3);
+      .slice(-2);
 
-    if (recentHistory.length === 0) {
-      // Первое сообщение - включаем системный промпт
-      prompt = `<s>[INST] ${systemPrompt}\n\n${userMessage} [/INST]`;
-    } else {
-      // Есть история - формируем диалог
-      prompt = "<s>";
+    // Формируем простой промпт с контекстом
+    let prompt = systemPrompt + "\n\n";
 
-      for (let i = 0; i < recentHistory.length; i++) {
-        const msg = recentHistory[i];
+    if (recentHistory.length > 0) {
+      prompt += "История диалога:\n";
+      for (const msg of recentHistory) {
         if (msg.role === "user") {
-          if (i === 0) {
-            // Первое сообщение в истории - добавляем системный промпт
-            prompt += `[INST] ${systemPrompt}\n\n${msg.content} [/INST]`;
-          } else {
-            prompt += `[INST] ${msg.content} [/INST]`;
-          }
-        } else if (msg.role === "assistant") {
-          prompt += ` ${msg.content}</s> `;
+          prompt += `Вопрос: ${msg.content}\n`;
+        } else {
+          prompt += `Ответ: ${msg.content}\n`;
         }
       }
-
-      // Добавляем текущий вопрос пользователя
-      prompt += `<s>[INST] ${userMessage} [/INST]`;
+      prompt += "\n";
     }
+
+    prompt += `Вопрос: ${userMessage}\nОтвет:`;
 
     console.log("Sending to HF API:", { model: HF_MODEL, promptLength: prompt.length });
 
-    // Запрос к Hugging Face Inference API
-    const response = await fetch(
-      `https://api-inference.huggingface.co/models/${HF_MODEL}`,
-      {
+    // Запрос к Hugging Face Inference API через Vite прокси
+    // В dev режиме: /api/huggingface/models/... -> https://router.huggingface.co/models/...
+    // (HuggingFace обновил URL с api-inference.huggingface.co на router.huggingface.co)
+    const apiUrl = `/api/huggingface/models/${HF_MODEL}`;
+
+    const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${HF_API_KEY}`,
@@ -180,12 +175,12 @@ export const getChatResponse = async (
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_new_tokens: 350,
+            max_new_tokens: 200,
             temperature: 0.7,
-            top_p: 0.95,
-            repetition_penalty: 1.1,
-            return_full_text: false,
+            top_p: 0.9,
+            repetition_penalty: 1.15,
             do_sample: true,
+            stop: ["\nВопрос:", "\n\n"],
           },
         }),
       }
@@ -193,8 +188,8 @@ export const getChatResponse = async (
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`HF API error: ${response.status}`, errorText);
-      throw new Error(`HF API error: ${response.status}`);
+      console.info(`💡 HF API недоступен (${response.status}) - используются локальные ответы`);
+      return getFallbackResponse(userMessage);
     }
 
     const data = await response.json();
@@ -214,11 +209,10 @@ export const getChatResponse = async (
       throw new Error("Unexpected response format");
     }
 
-    // Очищаем ответ от тегов и лишнего текста
+    // Очищаем ответ от лишнего текста
     aiResponse = aiResponse
-      .replace(/<s>/g, "")
-      .replace(/<\/s>/g, "")
-      .replace(/\[INST\].*?\[\/INST\]/gs, "")
+      .split("\nВопрос:")[0] // Убираем все после следующего вопроса
+      .split("\n\n")[0] // Или после двойного переноса
       .trim();
 
     if (!aiResponse || aiResponse.length < 3) {
@@ -228,7 +222,13 @@ export const getChatResponse = async (
 
     return aiResponse;
   } catch (error) {
-    console.error("AI service error:", error);
+    // CORS ошибка - это ожидаемо при прямых запросах к HuggingFace из браузера
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.info("💡 CORS ограничение HuggingFace API - используются локальные ответы");
+      console.info("ℹ️  Для использования AI в production добавьте бэкенд endpoint для проксирования запросов");
+    } else {
+      console.warn("AI service error:", error);
+    }
     return getFallbackResponse(userMessage);
   }
 };

@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  ChevronLeft,
   Send,
   Sparkles,
   TrendingUp,
@@ -60,7 +58,6 @@ const saveChatHistory = (messages: Message[]) => {
 };
 
 export default function Chat() {
-  const navigate = useNavigate();
   const { TG, user } = useTelegram();
   const [messages, setMessages] = useState<Message[]>(() =>
     loadChatHistory(user?.first_name)
@@ -76,6 +73,16 @@ export default function Chat() {
 
   useEffect(() => {
     TG.ready();
+
+    // Расширяем viewport на весь экран для корректной работы с клавиатурой
+    if (TG.expand && typeof TG.expand === 'function') {
+      try {
+        TG.expand();
+      } catch (e) {
+        console.log('expand not supported');
+      }
+    }
+
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, TG]);
 
@@ -155,27 +162,17 @@ export default function Chat() {
   ];
 
   return (
-    <div className="pb-20 flex flex-col min-h-screen max-h-screen">
+    <div className="flex flex-col min-h-screen max-h-screen">
       {/* Header */}
       <div className="flex-shrink-0 sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-2"
-            onClick={() => navigate("/")}
-          >
-            <ChevronLeft size={20} />
-          </Button>
-          <div className="flex items-center">
-            <Sparkles size={20} className="text-finance-purple mr-2" />
-            <h1 className="text-xl font-semibold">AI Помощник</h1>
-          </div>
+          <Sparkles size={20} className="text-finance-purple mr-2" />
+          <h1 className="text-xl font-semibold">AI Помощник</h1>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 pb-44 space-y-4 custom-scrollbar">
         {messages.length === 1 && (
           <div className="mb-6">
             <p className="text-sm text-muted-foreground mb-3 text-center">
@@ -256,8 +253,8 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="flex-shrink-0 bg-background border-t border-border p-4">
+      {/* Input Area - над контентом, но под навигацией */}
+      <div className="fixed bottom-20 left-0 right-0 z-30 bg-background border-t border-border p-4 max-w-md mx-auto">
         <div className="flex items-end space-x-2">
           <div className="flex-1 neumorph-inset rounded-2xl px-4 py-2">
             <textarea
