@@ -1,9 +1,10 @@
 // Hugging Face Inference API для работы с AI моделями
-// Используем бесплатный доступ к ChatGPT-совместимым моделям
+// Используем OpenAI SDK для совместимости с HuggingFace Router API
 //
-// ВАЖНО: Hugging Face API имеет CORS ограничения при прямых запросах из браузера.
-// Для production необходимо создать бэкенд endpoint, который будет проксировать запросы.
-// Сейчас используется fallback на основе ключевых слов при ошибках CORS.
+// ВАЖНО: Это Telegram Mini App (работает в браузере внутри Telegram)
+// OpenAI SDK требует флаг dangerouslyAllowBrowser: true для работы в браузере
+// Для production рекомендуется создать бэкенд endpoint для проксирования запросов
+import { OpenAI } from "openai";
 
 interface Message {
   role: "user" | "assistant";
@@ -124,9 +125,10 @@ export const getChatResponse = async (
   conversationHistory: Message[]
 ): Promise<string> => {
   try {
-    // Используем Finance-Llama-8B - специализированная модель для финансовых вопросов
+    // Используем Llama-3.1-8B-Instruct - мощная модель от Meta с отличной поддержкой различных языков
+    // Работает через HuggingFace Router API (совместимый с OpenAI SDK)
     const HF_API_KEY = import.meta.env.VITE_HF_API_KEY || "hf_demo_key";
-    const HF_MODEL = "tarun7r/Finance-Llama-8B";
+    const HF_MODEL = "meta-llama/Llama-3.1-8B-Instruct";
 
     // Если API ключ не настроен, используем fallback
     if (HF_API_KEY === "hf_demo_key" || !HF_API_KEY) {
@@ -134,101 +136,70 @@ export const getChatResponse = async (
       return getFallbackResponse(userMessage);
     }
 
-    // Формируем промпт для Finance-Llama-8B
+    // Создаём клиент OpenAI, настроенный на HuggingFace Router
+    // ВАЖНО: dangerouslyAllowBrowser нужен для работы в браузере (Telegram Mini App)
+    // Для production рекомендуется создать бэкенд endpoint для проксирования запросов
+    const client = new OpenAI({
+      baseURL: "https://router.huggingface.co/v1",
+      apiKey: HF_API_KEY,
+      dangerouslyAllowBrowser: true,
+    });
+
+    // Формируем системный промпт
     const systemPrompt = getSystemPrompt();
 
-    // Берем последние 2 сообщения для контекста
+    // Берем последние 4 сообщения для контекста
     const recentHistory = conversationHistory
       .filter(msg => msg.id !== "welcome")
-      .slice(-2);
+      .slice(-4);
 
-    // Формируем простой промпт с контекстом
-    let prompt = systemPrompt + "\n\n";
+    // Формируем сообщения для chatCompletion API
+    const messages: any[] = [
+      {
+        role: "system",
+        content: systemPrompt,
+      },
+      // Добавляем историю диалога
+      ...recentHistory.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+      // Добавляем текущий вопрос пользователя
+      {
+        role: "user",
+        content: userMessage,
+      },
+    ];
 
-    if (recentHistory.length > 0) {
-      prompt += "История диалога:\n";
-      for (const msg of recentHistory) {
-        if (msg.role === "user") {
-          prompt += `Вопрос: ${msg.content}\n`;
-        } else {
-          prompt += `Ответ: ${msg.content}\n`;
-        }
-      }
-      prompt += "\n";
-    }
+    console.log("Sending to HF API:", {
+      model: HF_MODEL,
+      messagesCount: messages.length
+    });
 
-    prompt += `Вопрос: ${userMessage}\nОтвет:`;
+    // Запрос к Hugging Face через OpenAI SDK
+    const response = await client.chat.completions.create({
+      model: HF_MODEL,
+      messages: messages,
+      max_tokens: 300,
+      temperature: 0.5,
+      top_p: 0.7,
+      stream: false, // Пока без streaming для простоты
+    });
 
-    console.log("Sending to HF API:", { model: HF_MODEL, promptLength: prompt.length });
+    console.log("HF API response:", response);
 
-    // Запрос к Hugging Face Inference API через Vite прокси
-    // В dev режиме: /api/huggingface/models/... -> https://router.huggingface.co/models/...
-    // (HuggingFace обновил URL с api-inference.huggingface.co на router.huggingface.co)
-    const apiUrl = `/api/huggingface/models/${HF_MODEL}`;
-
-    const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${HF_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 200,
-            temperature: 0.7,
-            top_p: 0.9,
-            repetition_penalty: 1.15,
-            do_sample: true,
-            stop: ["\nВопрос:", "\n\n"],
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.info(`💡 HF API недоступен (${response.status}) - используются локальные ответы`);
-      return getFallbackResponse(userMessage);
-    }
-
-    const data = await response.json();
-    console.log("HF API response:", data);
-
-    // Извлекаем текст ответа
-    let aiResponse = "";
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      aiResponse = data[0].generated_text;
-    } else if (data.generated_text) {
-      aiResponse = data.generated_text;
-    } else if (data.error) {
-      console.error("HF API error:", data.error);
-      throw new Error(data.error);
-    } else {
-      console.error("Unexpected response format:", data);
-      throw new Error("Unexpected response format");
-    }
-
-    // Очищаем ответ от лишнего текста
-    aiResponse = aiResponse
-      .split("\nВопрос:")[0] // Убираем все после следующего вопроса
-      .split("\n\n")[0] // Или после двойного переноса
-      .trim();
+    // Извлекаем текст ответа из chatCompletion
+    const aiResponse = response.choices?.[0]?.message?.content || "";
 
     if (!aiResponse || aiResponse.length < 3) {
       console.warn("Empty AI response, using fallback");
       return getFallbackResponse(userMessage);
     }
 
-    return aiResponse;
+    return aiResponse.trim();
   } catch (error) {
-    // CORS ошибка - это ожидаемо при прямых запросах к HuggingFace из браузера
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.info("💡 CORS ограничение HuggingFace API - используются локальные ответы");
-      console.info("ℹ️  Для использования AI в production добавьте бэкенд endpoint для проксирования запросов");
-    } else {
-      console.warn("AI service error:", error);
-    }
+    console.warn("AI service error:", error);
+    console.info("💡 Используются локальные ответы на основе ключевых слов");
     return getFallbackResponse(userMessage);
   }
 };

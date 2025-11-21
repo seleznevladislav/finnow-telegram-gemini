@@ -11,9 +11,14 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       // Прокси для HuggingFace API чтобы обойти CORS
       '/api/huggingface': {
-        target: 'https://api-inference.huggingface.co',
+        target: 'https://router.huggingface.co',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/huggingface/, ''),
+        rewrite: (path) => {
+          // Убираем /api/huggingface и добавляем /generate к пути модели
+          const newPath = path.replace(/^\/api\/huggingface\/models\/([^\/]+)(\/.*)?/, '/models/$1/generate');
+          console.log('Rewriting path:', path, '->', newPath);
+          return newPath;
+        },
         secure: true,
       },
     },
