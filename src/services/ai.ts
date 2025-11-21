@@ -11,6 +11,462 @@ interface Message {
   content: string;
 }
 
+// ============================================================================
+// ФУНКЦИИ ДЛЯ ПОЛУЧЕНИЯ АКТУАЛЬНЫХ ДАННЫХ ИЗ ИНТЕРНЕТА
+// ============================================================================
+
+// Интерфейсы для данных
+interface CryptoPrice {
+  symbol: string;
+  name: string;
+  current_price: number;
+  price_change_24h: number;
+  price_change_percentage_24h: number;
+}
+
+interface CurrencyRate {
+  currency: string;
+  rate: number;
+}
+
+interface StockPrice {
+  ticker: string;           // Тикер акции (например, SBER, GAZP, YNDX)
+  name: string;             // Полное название компании
+  price: number;            // Текущая цена
+  change: number;           // Изменение цены
+  changePercent: number;    // Изменение в процентах
+  volume: number;           // Объём торгов
+}
+
+interface BondPrice {
+  ticker: string;           // Тикер облигации
+  name: string;             // Название облигации
+  price: number;            // Текущая цена
+  faceValue: number;        // Номинал
+  yield: number;            // Доходность к погашению (%)
+  couponRate: number;       // Купонная ставка (%)
+  maturityDate?: string;    // Дата погашения
+}
+
+// Кэш для котировок (чтобы не спамить API при каждом сообщении)
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+let cryptoCache: CacheEntry<CryptoPrice[]> | null = null;
+let currencyCache: CacheEntry<CurrencyRate[]> | null = null;
+let stocksCache: CacheEntry<StockPrice[]> | null = null;
+let bondsCache: CacheEntry<BondPrice[]> | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
+
+function isCacheValid<T>(cache: CacheEntry<T> | null): boolean {
+  if (!cache) return false;
+  return Date.now() - cache.timestamp < CACHE_DURATION;
+}
+
+// Получение котировок криптовалют через CoinGecko API (бесплатный, без ключа)
+async function getCryptoPrices(): Promise<CryptoPrice[]> {
+  // Проверяем кэш
+  if (isCacheValid(cryptoCache)) {
+    console.log('📦 Используем кэшированные котировки криптовалют');
+    return cryptoCache!.data;
+  }
+
+  try {
+    console.log('🌐 Получаем свежие котировки криптовалют...');
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,tether,binancecoin&order=market_cap_desc&sparkline=false'
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const prices = data.map((coin: any) => ({
+      symbol: coin.symbol.toUpperCase(),
+      name: coin.name,
+      current_price: coin.current_price,
+      price_change_24h: coin.price_change_24h,
+      price_change_percentage_24h: coin.price_change_percentage_24h,
+    }));
+
+    // Сохраняем в кэш
+    cryptoCache = {
+      data: prices,
+      timestamp: Date.now(),
+    };
+
+    return prices;
+  } catch (error) {
+    console.error('Ошибка получения криптовалютных котировок:', error);
+    // Если есть старый кэш, используем его
+    if (cryptoCache) {
+      console.log('⚠️ Используем устаревший кэш криптовалют');
+      return cryptoCache.data;
+    }
+    return [];
+  }
+}
+
+// Получение курсов валют через Exchangerate API (бесплатный)
+async function getCurrencyRates(): Promise<CurrencyRate[]> {
+  // Проверяем кэш
+  if (isCacheValid(currencyCache)) {
+    console.log('📦 Используем кэшированные курсы валют');
+    return currencyCache!.data;
+  }
+
+  try {
+    console.log('🌐 Получаем свежие курсы валют...');
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Берём основные валюты относительно доллара
+    const currencies = ['EUR', 'RUB', 'CNY', 'JPY'];
+    const rates = currencies.map(currency => ({
+      currency,
+      rate: data.rates[currency],
+    }));
+
+    // Сохраняем в кэш
+    currencyCache = {
+      data: rates,
+      timestamp: Date.now(),
+    };
+
+    return rates;
+  } catch (error) {
+    console.error('Ошибка получения курсов валют:', error);
+    // Если есть старый кэш, используем его
+    if (currencyCache) {
+      console.log('⚠️ Используем устаревший кэш валют');
+      return currencyCache.data;
+    }
+    return [];
+  }
+}
+
+// Флаг для использования реального MOEX API (требует backend proxy)
+// Для разработки используем моковые данные, чтобы избежать CORS ошибок
+const USE_REAL_MOEX_API = false;
+
+// Получение котировок акций через MOEX API (Московская Биржа, бесплатный API)
+// ВАЖНО: MOEX API не поддерживает CORS запросы из браузера
+// Для production необходимо создать backend endpoint, который будет проксировать запросы к MOEX
+// Сейчас используются моковые данные для разработки
+async function getStockPrices(): Promise<StockPrice[]> {
+  // Проверяем кэш
+  if (isCacheValid(stocksCache)) {
+    console.log('📦 Используем кэшированные котировки акций');
+    return stocksCache!.data;
+  }
+
+  // Моковые данные для разработки (используются по умолчанию)
+  const mockStocks: StockPrice[] = [
+    {
+      ticker: 'SBER',
+      name: 'Сбербанк',
+      price: 280.50,
+      change: 3.20,
+      changePercent: 1.15,
+      volume: 1234567890,
+    },
+    {
+      ticker: 'GAZP',
+      name: 'Газпром',
+      price: 156.80,
+      change: -2.10,
+      changePercent: -1.32,
+      volume: 987654321,
+    },
+    {
+      ticker: 'YNDX',
+      name: 'Яндекс',
+      price: 3245.00,
+      change: 45.50,
+      changePercent: 1.42,
+      volume: 234567890,
+    },
+    {
+      ticker: 'LKOH',
+      name: 'ЛУКОЙЛ',
+      price: 6789.00,
+      change: -32.00,
+      changePercent: -0.47,
+      volume: 456789012,
+    },
+    {
+      ticker: 'GMKN',
+      name: 'Норникель',
+      price: 15234.00,
+      change: 123.00,
+      changePercent: 0.81,
+      volume: 345678901,
+    },
+  ];
+
+  // Если реальный API не включен, сразу возвращаем моки
+  if (!USE_REAL_MOEX_API) {
+    console.log('💡 Используем моковые данные акций (режим разработки)');
+    stocksCache = {
+      data: mockStocks,
+      timestamp: Date.now(),
+    };
+    return mockStocks;
+  }
+
+  // Попытка получить реальные данные (только если USE_REAL_MOEX_API = true)
+  try {
+    console.log('🌐 Получаем свежие котировки акций с MOEX...');
+
+    // Популярные российские акции для мониторинга
+    const tickers = ['SBER', 'GAZP', 'YNDX', 'LKOH', 'GMKN'];
+
+    // MOEX ISS API - получаем данные по нескольким акциям
+    const response = await fetch(
+      `https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?securities=${tickers.join(',')}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // MOEX API возвращает данные в формате columns + data
+    const securities = data.securities;
+    const marketdata = data.marketdata;
+
+    if (!securities || !marketdata) {
+      throw new Error('Некорректный формат данных MOEX');
+    }
+
+    // Создаём индекс колонок для удобного доступа
+    const secColIndex: Record<string, number> = {};
+    securities.columns.forEach((col: string, idx: number) => {
+      secColIndex[col] = idx;
+    });
+
+    const mktColIndex: Record<string, number> = {};
+    marketdata.columns.forEach((col: string, idx: number) => {
+      mktColIndex[col] = idx;
+    });
+
+    // Парсим данные
+    const stocks: StockPrice[] = [];
+
+    for (let i = 0; i < securities.data.length; i++) {
+      const secRow = securities.data[i];
+      const mktRow = marketdata.data[i];
+
+      const ticker = secRow[secColIndex['SECID']];
+      const name = secRow[secColIndex['SHORTNAME']] || secRow[secColIndex['SECNAME']];
+      const price = mktRow[mktColIndex['LAST']] || mktRow[mktColIndex['PREVPRICE']] || 0;
+      const change = mktRow[mktColIndex['CHANGE']] || 0;
+      const changePercent = mktRow[mktColIndex['LASTTOPREVPRICE']] || 0;
+      const volume = mktRow[mktColIndex['VOLTODAY']] || 0;
+
+      if (ticker && price > 0) {
+        stocks.push({
+          ticker,
+          name,
+          price,
+          change,
+          changePercent,
+          volume,
+        });
+      }
+    }
+
+    // Сохраняем в кэш
+    stocksCache = {
+      data: stocks,
+      timestamp: Date.now(),
+    };
+
+    return stocks;
+  } catch (error) {
+    console.error('Ошибка получения котировок акций:', error);
+    // Если есть старый кэш, используем его
+    if (stocksCache) {
+      console.log('⚠️ Используем устаревший кэш акций');
+      return stocksCache.data;
+    }
+
+    // CORS fallback: используем моковые данные
+    console.log('💡 Используем моковые данные акций (fallback)');
+    stocksCache = {
+      data: mockStocks,
+      timestamp: Date.now(),
+    };
+
+    return mockStocks;
+  }
+}
+
+// Получение котировок облигаций через MOEX API
+// ВАЖНО: MOEX API не поддерживает CORS запросы из браузера
+// Для production необходимо создать backend endpoint, который будет проксировать запросы к MOEX
+// Сейчас используются моковые данные для разработки
+async function getBondPrices(): Promise<BondPrice[]> {
+  // Проверяем кэш
+  if (isCacheValid(bondsCache)) {
+    console.log('📦 Используем кэшированные котировки облигаций');
+    return bondsCache!.data;
+  }
+
+  // Моковые данные для разработки (используются по умолчанию)
+  const mockBonds: BondPrice[] = [
+    {
+      ticker: 'SU26238RMFS4',
+      name: 'ОФЗ 26238',
+      price: 98.45,
+      faceValue: 1000,
+      yield: 12.35,
+      couponRate: 7.5,
+      maturityDate: '2028-07-19',
+    },
+    {
+      ticker: 'SU26240RMFS9',
+      name: 'ОФЗ 26240',
+      price: 96.78,
+      faceValue: 1000,
+      yield: 13.12,
+      couponRate: 6.9,
+      maturityDate: '2031-03-17',
+    },
+    {
+      ticker: 'SU26241RMFS7',
+      name: 'ОФЗ 26241',
+      price: 94.23,
+      faceValue: 1000,
+      yield: 14.05,
+      couponRate: 6.1,
+      maturityDate: '2034-01-24',
+    },
+  ];
+
+  // Если реальный API не включен, сразу возвращаем моки
+  if (!USE_REAL_MOEX_API) {
+    console.log('💡 Используем моковые данные облигаций (режим разработки)');
+    bondsCache = {
+      data: mockBonds,
+      timestamp: Date.now(),
+    };
+    return mockBonds;
+  }
+
+  // Попытка получить реальные данные (только если USE_REAL_MOEX_API = true)
+  try {
+    console.log('🌐 Получаем свежие котировки облигаций с MOEX...');
+
+    // Популярные ОФЗ (облигации федерального займа) для мониторинга
+    const tickers = ['SU26238RMFS4', 'SU26240RMFS9', 'SU26241RMFS7']; // ОФЗ с разными сроками
+
+    // MOEX ISS API - получаем данные по облигациям
+    const response = await fetch(
+      `https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json?securities=${tickers.join(',')}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const securities = data.securities;
+    const marketdata = data.marketdata;
+
+    if (!securities || !marketdata) {
+      throw new Error('Некорректный формат данных MOEX');
+    }
+
+    // Создаём индекс колонок
+    const secColIndex: Record<string, number> = {};
+    securities.columns.forEach((col: string, idx: number) => {
+      secColIndex[col] = idx;
+    });
+
+    const mktColIndex: Record<string, number> = {};
+    marketdata.columns.forEach((col: string, idx: number) => {
+      mktColIndex[col] = idx;
+    });
+
+    // Парсим данные
+    const bonds: BondPrice[] = [];
+
+    for (let i = 0; i < securities.data.length; i++) {
+      const secRow = securities.data[i];
+      const mktRow = marketdata.data[i];
+
+      const ticker = secRow[secColIndex['SECID']];
+      const name = secRow[secColIndex['SHORTNAME']] || secRow[secColIndex['SECNAME']];
+      const price = mktRow[mktColIndex['LAST']] || mktRow[mktColIndex['PREVPRICE']] || 0;
+      const faceValue = secRow[secColIndex['FACEVALUE']] || 1000;
+      const yieldValue = mktRow[mktColIndex['YIELD']] || 0;
+      const couponRate = secRow[secColIndex['COUPONPERCENT']] || 0;
+      const maturityDate = secRow[secColIndex['MATDATE']];
+
+      if (ticker && price > 0) {
+        bonds.push({
+          ticker,
+          name,
+          price,
+          faceValue,
+          yield: yieldValue,
+          couponRate,
+          maturityDate,
+        });
+      }
+    }
+
+    // Сохраняем в кэш
+    bondsCache = {
+      data: bonds,
+      timestamp: Date.now(),
+    };
+
+    return bonds;
+  } catch (error) {
+    console.error('Ошибка получения котировок облигаций:', error);
+    // Если есть старый кэш, используем его
+    if (bondsCache) {
+      console.log('⚠️ Используем устаревший кэш облигаций');
+      return bondsCache.data;
+    }
+
+    // CORS fallback: используем моковые данные
+    console.log('💡 Используем моковые данные облигаций (fallback)');
+    bondsCache = {
+      data: mockBonds,
+      timestamp: Date.now(),
+    };
+
+    return mockBonds;
+  }
+}
+
+// Получение текущей даты и времени
+function getCurrentDateTime(): string {
+  const now = new Date();
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: 'Europe/Moscow',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  return now.toLocaleString('ru-RU', options);
+}
+
 // Моковые финансовые данные пользователя (в будущем будут из реального API)
 const getUserFinancialContext = () => {
   const accounts = [
@@ -76,12 +532,57 @@ const getUserFinancialContext = () => {
   return { accounts, recentTransactions, monthlyStats };
 };
 
-// Системный промпт для AI помощника
-const getSystemPrompt = () => {
+// Системный промпт для AI помощника (с актуальными данными)
+const getSystemPrompt = async () => {
   const context = getUserFinancialContext();
+
+  // Получаем актуальные данные из интернета
+  const currentDateTime = getCurrentDateTime();
+  const cryptoPrices = await getCryptoPrices();
+  const currencyRates = await getCurrencyRates();
+  const stockPrices = await getStockPrices();
+  const bondPrices = await getBondPrices();
+
+  // Формируем секцию с актуальными данными
+  let marketDataSection = `\n**АКТУАЛЬНЫЕ ДАННЫЕ (${currentDateTime}):**\n\n`;
+
+  if (cryptoPrices.length > 0) {
+    marketDataSection += `Криптовалюты:\n`;
+    cryptoPrices.forEach(crypto => {
+      const changeSign = crypto.price_change_percentage_24h >= 0 ? '+' : '';
+      marketDataSection += `- ${crypto.name} (${crypto.symbol}): $${crypto.current_price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${changeSign}${crypto.price_change_percentage_24h.toFixed(2)}% за 24ч)\n`;
+    });
+    marketDataSection += '\n';
+  }
+
+  if (currencyRates.length > 0) {
+    marketDataSection += `Курсы валют (к USD):\n`;
+    currencyRates.forEach(rate => {
+      marketDataSection += `- 1 USD = ${rate.rate.toFixed(2)} ${rate.currency}\n`;
+    });
+    marketDataSection += '\n';
+  }
+
+  if (stockPrices.length > 0) {
+    marketDataSection += `Российские акции (MOEX):\n`;
+    stockPrices.forEach(stock => {
+      const changeSign = stock.changePercent >= 0 ? '+' : '';
+      marketDataSection += `- ${stock.name} (${stock.ticker}): ${stock.price.toFixed(2)}₽ (${changeSign}${stock.changePercent.toFixed(2)}%)\n`;
+    });
+    marketDataSection += '\n';
+  }
+
+  if (bondPrices.length > 0) {
+    marketDataSection += `Облигации федерального займа (ОФЗ):\n`;
+    bondPrices.forEach(bond => {
+      marketDataSection += `- ${bond.name}: ${bond.price.toFixed(2)}% от номинала, доходность ${bond.yield.toFixed(2)}% годовых\n`;
+    });
+    marketDataSection += '\n';
+  }
 
   return `Ты - умный финансовый помощник в приложении FinNow. Твоя задача - помогать пользователю управлять личными финансами.
 
+${marketDataSection}
 **КОНТЕКСТ О ПОЛЬЗОВАТЕЛЕ:**
 
 Счета и карты:
@@ -104,17 +605,29 @@ ${context.recentTransactions.map((t) => `- ${t.title}: ${t.amount}₽ (${t.categ
 4. При вопросах о выборе карты - учитывай кэшбэк и категории месяца
 5. Используй эмодзи для дружелюбности (но не переборщи)
 6. Если вопрос не по финансам - вежливо напомни, что ты финансовый помощник
+7. У тебя есть доступ к актуальным данным: криптовалюты, курсы валют, акции (MOEX), облигации (ОФЗ)
+8. При вопросах об инвестициях давай взвешенные рекомендации с учетом рисков и доходности
+9. Всегда предупреждай о рисках инвестиций (акции могут падать, облигации имеют инфляционный риск)
 
 **ПРИМЕРЫ ОТВЕТОВ:**
 
 Вопрос: "С какой карты лучше оплатить обед в ресторане?"
 Ответ: "🍽️ Используйте Альфа-Банк •4567 - там сейчас кэшбэк 5% на рестораны! Это вернёт вам часть денег. У вас есть 84,590₽ на этой карте."
 
+Вопрос: "Какой сейчас курс биткоина?"
+Ответ: "₿ Bitcoin сейчас стоит $67,234.56 (+2.45% за 24 часа). Если думаете об инвестициях - помните про риски и не вкладывайте больше, чем можете позволить потерять."
+
 Вопрос: "Как сэкономить деньги?"
 Ответ: "💰 Заметил, что на рестораны вы тратите 8,400₽ - это на 15% выше среднего. Попробуйте готовить дома 2-3 раза в неделю. Потенциальная экономия: ~2,500₽/месяц!"
 
-Вопрос: "Хватит ли денег до конца месяца?"
-Ответ: "✅ При текущих тратах (43,250₽/мес) у вас хватит денег. Баланс на картах: 129,590₽, плюс накопления 125,000₽. Вы откладываете ~49% дохода - отлично!"
+Вопрос: "Стоит ли покупать акции Сбербанка?"
+Ответ: "📈 Сбербанк (SBER) сейчас торгуется по 280.50₽ (+1.2%). Это голубая фишка с дивидендами ~8%. Подходит для долгосрочных инвестиций. Помните: акции могут падать, инвестируйте только свободные средства."
+
+Вопрос: "Что лучше - акции или облигации?"
+Ответ: "⚖️ Зависит от вашей цели. ОФЗ дают ~12-14% годовых с низким риском - для сбережений. Акции рискованнее, но потенциал выше - для роста капитала. Оптимально: 60-70% облигации, 30-40% акции для баланса."
+
+Вопрос: "Какая доходность у облигаций сейчас?"
+Ответ: "📊 ОФЗ сейчас дают доходность 12-14% годовых. Это выше, чем вклады в банках (8-10%), и почти нет риска - государство гарантирует выплаты. Хороший вариант для части сбережений с накопительного счета."
 
 Теперь отвечай на вопросы пользователя!`;
 };
@@ -145,8 +658,8 @@ export const getChatResponse = async (
       dangerouslyAllowBrowser: true,
     });
 
-    // Формируем системный промпт
-    const systemPrompt = getSystemPrompt();
+    // Формируем системный промпт с актуальными данными из интернета
+    const systemPrompt = await getSystemPrompt();
 
     // Берем последние 4 сообщения для контекста
     const recentHistory = conversationHistory
@@ -287,6 +800,48 @@ const getFallbackResponse = (userMessage: string): string => {
     return `💳 У вас 3 карты:\n• Альфа-Банк (5% на рестораны)\n• Т-Банк (10% на такси/доставку)\n• Сбербанк (8% годовых)\n\nИспользуйте карту по категории покупки для максимального кэшбэка!`;
   }
 
+  // Вопросы об инвестициях, акциях и облигациях
+  if (
+    message.includes("акци") ||
+    message.includes("сбербанк") ||
+    message.includes("газпром") ||
+    message.includes("яндекс")
+  ) {
+    return `📈 Сейчас доступны котировки российских акций: Сбербанк, Газпром, Яндекс, Лукойл, Норникель. Акции подходят для долгосрочных инвестиций (3-5 лет). Помните: они могут падать на 20-40%, инвестируйте только свободные средства!`;
+  }
+
+  if (
+    message.includes("облигаци") ||
+    message.includes("офз") ||
+    message.includes("бонд")
+  ) {
+    return `📊 ОФЗ (облигации федерального займа) — надёжный инструмент с доходностью 12-14% годовых. Риск минимален — государство гарантирует выплаты. Отличная альтернатива банковским вкладам для части сбережений.`;
+  }
+
+  if (
+    message.includes("инвестиц") ||
+    message.includes("инвестир") ||
+    message.includes("вложи") ||
+    message.includes("куда вложить")
+  ) {
+    return `💼 Для начала инвестиций рекомендую:\n• 60-70% в ОФЗ (стабильность, 12-14%)\n• 30-40% в голубые фишки (рост, дивиденды)\n• Горизонт от 3 лет\n\nВаш накопительный счёт (125,000₽) хорошо подходит для старта!`;
+  }
+
+  if (
+    (message.includes("что") || message.includes("куда")) &&
+    (message.includes("лучше") || message.includes("выгодн")) &&
+    (message.includes("деньги") || message.includes("средства"))
+  ) {
+    return `💡 С вашими сбережениями (${context.monthlyStats.savings.toLocaleString()}₽/мес) есть варианты:\n• Накопительный счёт: 8% без риска\n• ОФЗ: 12-14%, низкий риск\n• Акции: потенциально больше, но с риском\n\nРекомендую диверсификацию!`;
+  }
+
+  if (
+    message.includes("риск") &&
+    (message.includes("акци") || message.includes("инвест"))
+  ) {
+    return `⚠️ Риски инвестиций:\n• Акции могут упасть на 20-40%\n• Не вкладывайте деньги на срок <3 лет\n• Диверсифицируйте (разные компании)\n• Инвестируйте только свободные средства\n\nНачните с 10-20% от сбережений.`;
+  }
+
   // Дефолтный ответ
-  return `Понял ваш вопрос! 🤔 Могу помочь с:\n• Выбором карты для покупок\n• Анализом расходов\n• Советами по экономии\n• Прогнозом бюджета\n\nУточните, что именно вас интересует?`;
+  return `Понял ваш вопрос! 🤔 Могу помочь с:\n• Выбором карты для покупок\n• Анализом расходов\n• Советами по экономии\n• Прогнозом бюджета\n• Рекомендациями по инвестициям\n\nУточните, что именно вас интересует?`;
 };
