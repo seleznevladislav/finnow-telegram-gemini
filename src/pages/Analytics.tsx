@@ -150,53 +150,48 @@ export default function Analytics() {
         </div>
 
         <div className="mb-6">
-          <h3 className="font-semibold text-base mb-4">Рекомендации</h3>
+          <h3 className="font-semibold text-base mb-3">Рекомендации</h3>
 
           {/* Блок — Рестораны */}
-          <div className="neumorph px-5 py-4 rounded-2xl shadow-sm mb-4 transition-all duration-300 hover:shadow-md hover:scale-[1.01] bg-card text-card-foreground">
-            <h4 className="text-sm font-medium text-foreground mb-1">
-              Оптимизируйте расходы на рестораны
-            </h4>
-            <div className="flex justify-between items-start gap-3">
-              <p className="text-xs text-muted-foreground leading-snug">
-                Ваши расходы на рестораны составляют{" "}
-                <span className="text-finance-yellow font-medium">8,400 ₽</span>
-                , что на{" "}
-                <span className="text-finance-yellow font-medium">15%</span>{" "}
-                выше среднего. Рассмотрите возможность готовить дома чаще.
-              </p>
+          <div className="neumorph px-3 py-3 rounded-xl shadow-sm mb-2.5 transition-all duration-300 hover:shadow-md bg-card text-card-foreground">
+            <div className="flex justify-between items-start gap-2">
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-medium text-foreground mb-0.5">
+                  Расходы на рестораны
+                </h4>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  <span className="text-finance-yellow font-medium">8,400₽</span> — на 15% выше среднего
+                </p>
+                <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                  Готовьте дома чаще для экономии
+                </p>
+              </div>
               <AlertTriangle
-                size={42}
-                className="text-finance-yellow shrink-0 mt-1 animate-icon-pop"
+                size={28}
+                className="text-finance-yellow shrink-0"
               />
             </div>
-            <div className="mt-3 h-px w-full bg-gradient-to-r from-transparent via-muted to-transparent" />
           </div>
 
           {/* Блок — Налоговый вычет */}
-          <div className="neumorph px-5 py-4 rounded-2xl shadow-sm mb-4 transition-all duration-300 hover:shadow-md hover:scale-[1.01] bg-card text-card-foreground">
-            <h4 className="text-sm font-medium text-foreground mb-1">
-              Налоговый вычет
-            </h4>
-
-            <div className="flex justify-between items-start gap-3">
-              <div className="flex items-start space-x-2">
-                <p className="text-xs text-muted-foreground leading-snug">
-                  Вы имеете право на налоговый вычет за медицинские услуги.
-                  Потенциальная экономия:{" "}
-                  <span className="bg-finance-green/10 text-finance-green font-medium px-1.5 py-0.5 rounded">
-                    7,800 ₽
-                  </span>
-                  .
+          <div className="neumorph px-3 py-3 rounded-xl shadow-sm mb-2.5 transition-all duration-300 hover:shadow-md bg-card text-card-foreground">
+            <div className="flex justify-between items-start gap-2">
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-medium text-foreground mb-0.5">
+                  Налоговый вычет
+                </h4>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Экономия <span className="text-finance-green font-medium">7,800₽</span> за медуслуги
+                </p>
+                <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                  Оформите через налоговую
                 </p>
               </div>
               <ShieldCheck
-                size={42}
-                className="text-finance-green shrink-0 animate-icon-pop"
+                size={28}
+                className="text-finance-green shrink-0"
               />
             </div>
-
-            <div className="mt-3 h-px w-full bg-gradient-to-r from-transparent via-muted to-transparent" />
           </div>
         </div>
 

@@ -22,20 +22,42 @@ export default function AIInsightsSheet({
   monthlyExpenses = 43250,
 }: AIInsightsSheetProps) {
   const [isClosing, setIsClosing] = useState(false);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Обработка свайпа вниз для закрытия
+  // Обработка свайпа вниз для закрытия с отслеживанием движения пальца
   const handlers = useSwipeable({
-    onSwipedDown: () => {
-      handleClose();
+    onSwiping: (eventData) => {
+      // Отслеживаем только движение вниз
+      if (eventData.dir === 'Down' && eventData.deltaY > 0) {
+        setIsDragging(true);
+        setSwipeOffset(Math.min(eventData.deltaY, 400)); // Ограничиваем максимальное смещение
+      }
+    },
+    onSwipedDown: (eventData) => {
+      setIsDragging(false);
+      // Закрываем, если свайп был достаточно большой (больше 100px)
+      if (eventData.deltaY > 100) {
+        handleClose();
+      } else {
+        // Возвращаем на место
+        setSwipeOffset(0);
+      }
+    },
+    onSwiped: () => {
+      setIsDragging(false);
+      setSwipeOffset(0);
     },
     preventScrollOnSwipe: false,
     trackMouse: false,
+    trackTouch: true,
   });
 
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
+      setSwipeOffset(0);
       onClose();
     }, 300);
   };
@@ -44,6 +66,8 @@ export default function AIInsightsSheet({
   useEffect(() => {
     if (isOpen) {
       setIsClosing(false);
+      setSwipeOffset(0);
+      setIsDragging(false);
     }
   }, [isOpen]);
 
@@ -61,12 +85,20 @@ export default function AIInsightsSheet({
       <div
         className={`fixed inset-0 bg-black/50 z-40 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
         onClick={handleClose}
+        style={{
+          opacity: isDragging ? Math.max(0, 0.5 - (swipeOffset / 800)) : undefined,
+          transition: isDragging ? 'none' : 'opacity 0.3s ease-out',
+        }}
       />
 
       {/* Bottom Sheet */}
       <div
         {...handlers}
         className={`fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}
+        style={{
+          transform: `translateY(${swipeOffset}px)`,
+          transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+        }}
       >
         {/* Handle - можно свайпать вниз */}
         <div className="sticky top-0 z-10 bg-background pt-6 pb-2 px-4 border-b border-border">

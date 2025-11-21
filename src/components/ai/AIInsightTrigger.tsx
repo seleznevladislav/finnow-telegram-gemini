@@ -16,7 +16,7 @@ export default function AIInsightTrigger({
 
   return (
     <div
-      className="relative overflow-hidden financial-card cursor-pointer group"
+      className="relative overflow-hidden neumorph rounded-xl cursor-pointer group py-3 px-3"
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -25,30 +25,30 @@ export default function AIInsightTrigger({
       <div className="absolute inset-0 bg-gradient-to-r from-finance-blue/10 via-finance-purple/10 to-finance-green/10 opacity-50 group-hover:opacity-70 transition-opacity" />
 
       {/* Content */}
-      <div className="relative z-10 flex items-center gap-3">
+      <div className="relative z-10 flex items-center gap-2.5">
         {/* AI Icon */}
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-finance-blue to-finance-purple flex items-center justify-center shrink-0 animate-pulse">
-          <Sparkles size={24} className="text-white" />
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-finance-blue to-finance-purple flex items-center justify-center shrink-0 animate-pulse">
+          <Sparkles size={20} className="text-white" />
         </div>
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1">
-            <span className="text-xs font-medium text-primary uppercase tracking-wide">
-               Рекоммендация
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-[11px] font-medium text-primary uppercase tracking-wide">
+               AI Инсайт
             </span>
-            <span className="text-xs px-1.5 py-0.5 bg-finance-green/20 text-finance-green rounded-full font-medium whitespace-nowrap">
-              +{savingsAmount.toLocaleString('ru-RU')} ₽
+            <span className="text-[11px] px-1.5 py-0.5 bg-finance-green/20 text-finance-green rounded-full font-medium">
+              +{savingsAmount.toLocaleString('ru-RU')}₽
             </span>
           </div>
-          <p className="text-sm font-medium leading-snug">
-            {insightText}
+          <p className="text-xs font-medium leading-snug line-clamp-2">
+            Доступно для инвестиций после всех платежей
           </p>
         </div>
 
         {/* Arrow */}
         <ChevronRight
-          size={20}
+          size={18}
           className={`shrink-0 text-muted-foreground transition-transform ${
             isHovered ? "translate-x-1" : ""
           }`}
