@@ -97,7 +97,7 @@ export default function AccountDetail() {
       }`}
     >
       {/* Header */}
-      <div className="p-4 h-[220px]">
+      <div className="p-4 pt-20 h-[280px]">
         <Button
           variant="ghost"
           size="icon"
@@ -132,7 +132,7 @@ export default function AccountDetail() {
       {/* Card Visual - with animation and dark theme */}
       <div
         key={account.id}
-        className="absolute top-20 right-[-30px] animate-fly-in-tilt"
+        className="absolute top-36 right-[-30px] animate-fly-in-tilt"
       >
         <div
           className={`${
