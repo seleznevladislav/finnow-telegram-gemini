@@ -127,7 +127,7 @@ export default function Dashboard() {
       <div className="p-4 mt-4 animate-fade-in">
         {/* Search */}
         <div className="mb-6">
-          <div className="flex items-center px-4 py-2 rounded-xl bg-muted/20 shadow-sm transition focus-within:ring-2 focus-within:ring-primary">
+          <div className="flex items-center px-4 py-3 rounded-xl bg-muted/20 shadow-sm transition focus-within:ring-2 focus-within:ring-primary">
             <Search size={18} className="text-muted-foreground mr-2" />
             <input
               type="text"

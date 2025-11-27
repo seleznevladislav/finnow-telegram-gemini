@@ -49,7 +49,7 @@ export default function AIInsightCard({
           <h3 className="font-semibold text-base">{title}</h3>
         </div>
       </div>
-      <div className="ml-13">{children}</div>
+      <div className="ml-0">{children}</div>
     </div>
   );
 }
