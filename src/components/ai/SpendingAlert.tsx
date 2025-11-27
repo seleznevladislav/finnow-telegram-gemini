@@ -61,7 +61,7 @@ export default function SpendingAlert({
 
         {/* Триггер */}
         {trigger && (
-          <div className="bg-slate-100 dark:bg-card/50 border border-border p-3 rounded-xl">
+          <div className="bg-slate-100 dark:bg-card/50 border border-border p-4 rounded-xl">
             <p className="text-xs text-muted-foreground mb-1">
               Основной триггер
             </p>
@@ -97,7 +97,7 @@ export default function SpendingAlert({
         </div>
 
         {/* Потенциальная экономия */}
-        <div className="bg-green-50 dark:bg-finance-green/10 p-3 rounded-lg border border-finance-green/30">
+        <div className="bg-green-50 dark:bg-finance-green/10 p-4 rounded-lg border border-finance-green/30">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               💰 Потенциал экономии

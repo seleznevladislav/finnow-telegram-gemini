@@ -45,14 +45,14 @@ export default function InvestmentSuggestion({
     >
       <div className="space-y-4">
         {/* Доступная сумма */}
-        <div className="bg-slate-100 dark:bg-card/50 border border-border p-3 rounded-xl">
+        <div className="bg-slate-100 dark:bg-card/50 border border-border p-4 rounded-xl">
           <p className="text-xs text-muted-foreground mb-1">
             Доступно для инвестиций
           </p>
           <p className="text-lg font-semibold mb-2">
             {availableAmount.toLocaleString()} ₽
           </p>
-          <div className="text-xs text-muted-foreground space-y-1">
+          <div className="text-xs text-muted-foreground space-y-1.5">
             <div className="flex justify-between">
               <span>Всего на счетах:</span>
               <span>209,590₽</span>
@@ -124,7 +124,7 @@ export default function InvestmentSuggestion({
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Прогноз */}
-          <div className="bg-green-50 dark:bg-finance-green/10 border border-finance-green/30 p-3 rounded-lg">
+          <div className="bg-green-50 dark:bg-finance-green/10 border border-finance-green/30 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">
                 Сумма инвестиции
@@ -150,7 +150,7 @@ export default function InvestmentSuggestion({
           </div>
 
           {/* Сравнение */}
-          <div className="bg-slate-50 dark:bg-card/30 border border-border p-3 rounded-lg">
+          <div className="bg-slate-50 dark:bg-card/30 border border-border p-4 rounded-lg">
             <p className="text-xs text-muted-foreground mb-2">
               Альтернатива:
             </p>

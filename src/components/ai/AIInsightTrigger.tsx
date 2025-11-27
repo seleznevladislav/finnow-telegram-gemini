@@ -16,7 +16,7 @@ export default function AIInsightTrigger({
 
   return (
     <div
-      className="relative overflow-hidden neumorph rounded-xl cursor-pointer group py-3 px-3"
+      className="relative overflow-hidden neumorph rounded-xl cursor-pointer group p-4"
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -25,7 +25,7 @@ export default function AIInsightTrigger({
       <div className="absolute inset-0 bg-gradient-to-r from-finance-blue/10 via-finance-purple/10 to-finance-green/10 opacity-50 group-hover:opacity-70 transition-opacity" />
 
       {/* Content */}
-      <div className="relative z-10 flex items-center gap-2.5">
+      <div className="relative z-10 flex items-center gap-3">
         {/* AI Icon */}
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-finance-blue to-finance-purple flex items-center justify-center shrink-0 animate-pulse">
           <Sparkles size={20} className="text-white" />
