@@ -66,7 +66,7 @@ export default function SavingOpportunity({
     >
       <div className="space-y-4">
         {/* Общая сумма */}
-        <div className="neumorph p-4 rounded-xl text-center">
+        <div className="bg-slate-100 dark:bg-card/50 border border-border p-4 rounded-xl text-center">
           <p className="text-sm text-muted-foreground mb-1">
             Можно получить/сэкономить
           </p>
@@ -83,7 +83,7 @@ export default function SavingOpportunity({
           {opportunities.map((opportunity) => (
             <div
               key={opportunity.id}
-              className="neumorph p-4 rounded-xl space-y-3"
+              className="bg-slate-100 dark:bg-card/50 border border-border p-4 rounded-xl space-y-3"
             >
               <div className="flex items-start gap-3">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -108,7 +108,7 @@ export default function SavingOpportunity({
 
               {/* Срочность */}
               {opportunity.urgency && (
-                <div className="flex items-center gap-2 p-2 bg-finance-yellow/10 border border-finance-yellow/20 rounded-lg">
+                <div className="flex items-center gap-2 p-2 bg-yellow-50 dark:bg-finance-yellow/10 border border-finance-yellow/30 rounded-lg">
                   <Clock size={14} className="text-finance-yellow shrink-0" />
                   <p className="text-xs text-finance-yellow font-medium">
                     {opportunity.urgency.message}
@@ -131,7 +131,7 @@ export default function SavingOpportunity({
         </div>
 
         {/* Итоговое действие */}
-        <div className="bg-gradient-to-r from-finance-green/10 to-finance-blue/10 p-4 rounded-xl border border-finance-green/20">
+        <div className="bg-gradient-to-r from-green-100 to-blue-100 dark:from-finance-green/10 dark:to-finance-blue/10 p-4 rounded-xl border border-finance-green/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Действуй сейчас</span>
             <span className="text-xs text-muted-foreground">

@@ -142,7 +142,7 @@ export default function Accounts() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <h1 className="text-xl font-semibold">Счета и карты</h1>
         </div>
@@ -156,7 +156,7 @@ export default function Accounts() {
       </div>
       
       {/* Main content */}
-      <div className="p-4 animate-fade-in">
+      <div className="p-4 mt-4 animate-fade-in">
         {/* Total Balance */}
         <div className="neumorph p-4 mb-6">
           <p className="text-sm text-muted-foreground mb-1">Общий баланс</p>

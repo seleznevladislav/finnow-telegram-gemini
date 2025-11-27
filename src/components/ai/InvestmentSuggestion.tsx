@@ -45,7 +45,7 @@ export default function InvestmentSuggestion({
     >
       <div className="space-y-4">
         {/* Доступная сумма */}
-        <div className="neumorph-inset p-3 rounded-xl">
+        <div className="bg-slate-100 dark:bg-card/50 border border-border p-3 rounded-xl">
           <p className="text-xs text-muted-foreground mb-1">
             Доступно для инвестиций
           </p>
@@ -73,7 +73,7 @@ export default function InvestmentSuggestion({
         </div>
 
         {/* Рекомендация */}
-        <div className="neumorph p-4 rounded-xl space-y-3">
+        <div className="bg-slate-100 dark:bg-card/50 border border-border p-4 rounded-xl space-y-3">
           <div className="flex items-start justify-between">
             <div>
               <h4 className="font-semibold text-base mb-1">
@@ -124,7 +124,7 @@ export default function InvestmentSuggestion({
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Прогноз */}
-          <div className="bg-finance-green/5 p-3 rounded-lg">
+          <div className="bg-green-50 dark:bg-finance-green/10 border border-finance-green/30 p-3 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">
                 Сумма инвестиции
@@ -150,7 +150,7 @@ export default function InvestmentSuggestion({
           </div>
 
           {/* Сравнение */}
-          <div className="bg-muted/20 p-3 rounded-lg">
+          <div className="bg-slate-50 dark:bg-card/30 border border-border p-3 rounded-lg">
             <p className="text-xs text-muted-foreground mb-2">
               Альтернатива:
             </p>

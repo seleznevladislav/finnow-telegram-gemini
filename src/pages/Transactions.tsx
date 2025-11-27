@@ -91,7 +91,7 @@ export default function Transactions() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
@@ -113,7 +113,7 @@ export default function Transactions() {
       </div>
       
       {/* Main content */}
-      <div className="animate-fade-in">
+      <div className="animate-fade-in mt-4">
         {/* Filters */}
         <div className="p-4">
           {/* Search & Filter */}

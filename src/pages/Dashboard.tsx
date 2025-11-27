@@ -17,7 +17,7 @@ import StatCard from "@/components/StatCard";
 import AccountCard from "@/components/AccountCard";
 import TransactionItem from "@/components/TransactionItem";
 import AIInsightTrigger from "@/components/ai/AIInsightTrigger";
-import AIInsightsSheet from "@/components/ai/AIInsightsSheet";
+import AIInsightsStories from "@/components/ai/AIInsightsStories";
 import { useTelegram } from "@/hooks/useTelegram";
 import { useEffect, useState } from "react";
 
@@ -36,11 +36,6 @@ export default function Dashboard() {
       } catch (e) {
         console.log('requestFullscreen not supported');
       }
-    }
-
-    const container = document.querySelector(".routeContainer");
-    if (container) {
-      container.classList.add("pt-20");
     }
   }, []);
 
@@ -114,7 +109,7 @@ export default function Dashboard() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
         <div>
           <p className="text-muted-foreground text-sm">Привет,</p>
           <h1 className="text-xl font-semibold">{userName}</h1>
@@ -129,7 +124,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main content */}
-      <div className="p-4 animate-fade-in">
+      <div className="p-4 mt-4 animate-fade-in">
         {/* Search */}
         <div className="mb-6">
           <div className="flex items-center px-4 py-2 rounded-xl bg-muted/20 shadow-sm transition focus-within:ring-2 focus-within:ring-primary">
@@ -257,8 +252,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* AI Insights Bottom Sheet */}
-      <AIInsightsSheet
+      {/* AI Insights Stories */}
+      <AIInsightsStories
         isOpen={isAISheetOpen}
         onClose={() => setIsAISheetOpen(false)}
         availableAmount={Math.floor(availableForInvestment)}

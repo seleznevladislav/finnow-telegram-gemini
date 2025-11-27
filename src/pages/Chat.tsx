@@ -164,7 +164,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col min-h-screen max-h-screen">
       {/* Header */}
-      <div className="flex-shrink-0 sticky top-0 z-30 bg-background px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="flex-shrink-0 sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <Sparkles size={20} className="text-finance-purple mr-2" />
           <h1 className="text-xl font-semibold">AI Помощник</h1>
@@ -172,7 +172,7 @@ export default function Chat() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 pb-44 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 mt-4 pb-44 space-y-4 custom-scrollbar">
         {messages.length === 1 && (
           <div className="mb-6">
             <p className="text-sm text-muted-foreground mb-3 text-center">
