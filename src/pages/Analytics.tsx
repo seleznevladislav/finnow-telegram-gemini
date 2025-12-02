@@ -35,27 +35,16 @@ export default function Analytics() {
 
   // Sample expense data by category
   const expensesByCategory = [
-	{ name: "Продукты", value: 15800, color: "#7289da" },  
-	{ name: "Рестораны", value: 8400, color: "#a78bfa" },     
-	{ name: "Транспорт", value: 6200, color: "#34d399" },      
-	{ name: "Развлечения", value: 4500, color: "#fbbf24" },    
-	{ name: "Подписки", value: 2300, color: "#f87171" },      
-	{ name: "Прочее", value: 6050, color: "#9ca3af" },         
-  ];
-  
-
-  // Sample monthly data
-  const monthlyData = [
-    { name: "Янв", расходы: 32500, доходы: 85000 },
-    { name: "Фев", расходы: 35800, доходы: 85000 },
-    { name: "Мар", расходы: 38200, доходы: 87500 },
-    { name: "Апр", расходы: 43250, доходы: 85000 },
-    { name: "Май", расходы: 36900, доходы: 90000 },
-    { name: "Июн", расходы: 41200, доходы: 90000 },
+	{ name: "Продукты", value: 15800, color: "#7289da" },
+	{ name: "Рестораны", value: 8400, color: "#a78bfa" },
+	{ name: "Транспорт", value: 6200, color: "#34d399" },
+	{ name: "Развлечения", value: 4500, color: "#fbbf24" },
+	{ name: "Подписки", value: 2300, color: "#f87171" },
+	{ name: "Прочее", value: 6050, color: "#9ca3af" },
   ];
 
-  // Sample trend data
-  const trendData = [
+  // Данные за неделю
+  const weekData = [
     { day: "Пн", value: 4200 },
     { day: "Вт", value: 3800 },
     { day: "Ср", value: 5100 },
@@ -64,6 +53,54 @@ export default function Analytics() {
     { day: "Сб", value: 9600 },
     { day: "Вс", value: 6500 },
   ];
+
+  // Данные за месяц (последние 4 недели)
+  const monthData = [
+    { name: "Нед 1", расходы: 8200, доходы: 21250 },
+    { name: "Нед 2", расходы: 10500, доходы: 21250 },
+    { name: "Нед 3", расходы: 12800, доходы: 21250 },
+    { name: "Нед 4", расходы: 11750, доходы: 21250 },
+  ];
+
+  // Данные за год (12 месяцев)
+  const yearData = [
+    { name: "Янв", расходы: 32500, доходы: 85000 },
+    { name: "Фев", расходы: 35800, доходы: 85000 },
+    { name: "Мар", расходы: 38200, доходы: 87500 },
+    { name: "Апр", расходы: 43250, доходы: 85000 },
+    { name: "Май", расходы: 36900, доходы: 90000 },
+    { name: "Июн", расходы: 41200, доходы: 90000 },
+    { name: "Июл", расходы: 39800, доходы: 90000 },
+    { name: "Авг", расходы: 42100, доходы: 90000 },
+    { name: "Сен", расходы: 38900, доходы: 92000 },
+    { name: "Окт", расходы: 44200, доходы: 92000 },
+    { name: "Ноя", расходы: 40500, доходы: 92000 },
+    { name: "Дек", расходы: 43250, доходы: 95000 },
+  ];
+
+  // Выбираем данные в зависимости от периода
+  const getTrendData = () => {
+    if (period === "week") {
+      return weekData.map(item => ({ day: item.day, value: item.value }));
+    } else if (period === "month") {
+      return monthData.map(item => ({ day: item.name, value: item.расходы }));
+    } else {
+      return yearData.map(item => ({ day: item.name, value: item.расходы }));
+    }
+  };
+
+  const getMonthlyData = () => {
+    if (period === "week") {
+      return weekData.map(item => ({ name: item.day, расходы: item.value, доходы: item.value * 2.5 }));
+    } else if (period === "month") {
+      return monthData;
+    } else {
+      return yearData;
+    }
+  };
+
+  const trendData = getTrendData();
+  const monthlyData = getMonthlyData();
 
   const totalExpenses = expensesByCategory.reduce(
     (sum, category) => sum + category.value,
