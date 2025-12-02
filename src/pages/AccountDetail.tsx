@@ -73,8 +73,18 @@ export default function AccountDetail() {
   };
 
   const handlers = useSwipeable({
-    onSwipedLeft: () => goToAccount(currentIndex + 1),
-    onSwipedRight: () => goToAccount(currentIndex - 1),
+    onSwipedLeft: () => {
+      // Не обрабатываем свайп, если это последняя карта
+      if (currentIndex < accounts.length - 1) {
+        goToAccount(currentIndex + 1);
+      }
+    },
+    onSwipedRight: () => {
+      // Не обрабатываем свайп, если это первая карта
+      if (currentIndex > 0) {
+        goToAccount(currentIndex - 1);
+      }
+    },
     trackMouse: true,
   });
 

@@ -91,7 +91,7 @@ export default function Transactions() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background px-4 pt-6 pb-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <Button 
             variant="ghost" 

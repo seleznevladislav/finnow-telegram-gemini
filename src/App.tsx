@@ -14,11 +14,12 @@ import Analytics from "./pages/Analytics";
 import Chat from "./pages/Chat";
 import BottomNavigation from "./components/BottomNavigation";
 import { useTelegram } from "./hooks/useTelegram";
+import { logUserLogin, createLoginEvent } from "./services/logger";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const { isMobile, TG } = useTelegram();
+  const { isMobile, TG, user, platform } = useTelegram();
 
   useEffect(() => {
     // Отключаем вертикальные свайпы, чтобы приложение не закрывалось при свайпе вниз
@@ -35,6 +36,19 @@ const App = () => {
     //   }
     // };
   }, [TG]);
+
+  // Логирование входа пользователя в Google Sheets
+  useEffect(() => {
+    if (user) {
+      const loginEvent = createLoginEvent(user, platform, isMobile);
+      logUserLogin(loginEvent);
+      console.log('📊 Событие входа пользователя залогировано:', {
+        userId: user.id,
+        username: user.username,
+        platform,
+      });
+    }
+  }, [user, platform, isMobile]);
 
   return (
     <QueryClientProvider client={queryClient}>
