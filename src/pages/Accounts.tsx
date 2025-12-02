@@ -142,7 +142,7 @@ export default function Accounts() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-6 pb-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background px-4 pt-16 pb-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center">
           <h1 className="text-xl font-semibold">Счета и карты</h1>
         </div>
