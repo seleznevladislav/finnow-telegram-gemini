@@ -5,6 +5,7 @@ import SpendingAlert from "./SpendingAlert";
 import SavingOpportunity from "./SavingOpportunity";
 import { useSwipeable } from "react-swipeable";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface AIInsightsStoriesProps {
   isOpen: boolean;
@@ -17,10 +18,11 @@ interface AIInsightsStoriesProps {
 export default function AIInsightsStories({
   isOpen,
   onClose,
-  availableAmount = 101340,
+  availableAmount = 0,
   totalBalance = 209590,
   monthlyExpenses = 43250,
 }: AIInsightsStoriesProps) {
+  const navigate = useNavigate();
   const [currentStory, setCurrentStory] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -162,6 +164,13 @@ export default function AIInsightsStories({
 
   if (!isOpen && !isClosing) return null;
 
+  // Если нет средств для инвестирования, перенаправляем в модуль инвестиций
+  if (availableAmount === 0 && isOpen) {
+    handleClose();
+    setTimeout(() => navigate("/investments"), 300);
+    return null;
+  }
+
   const stories = [
     // Story 1: Investment Suggestion
     <div key="investment" className="h-full overflow-y-auto custom-scrollbar p-4 pb-20">
@@ -180,6 +189,10 @@ export default function AIInsightsStories({
         }}
         partnerAppUrl="https://www.tbank.ru/invest/"
         onLearnMore={() => console.log("Подробнее об облигации")}
+        onGoToInvestments={() => {
+          handleClose();
+          setTimeout(() => navigate("/investments"), 300);
+        }}
       />
     </div>,
 

@@ -17,6 +17,7 @@ interface InvestmentSuggestionProps {
   };
   partnerAppUrl?: string;
   onLearnMore?: () => void;
+  onGoToInvestments?: () => void;
 }
 
 export default function InvestmentSuggestion({
@@ -24,6 +25,7 @@ export default function InvestmentSuggestion({
   suggestion,
   partnerAppUrl = "https://www.tbank.ru/invest/",
   onLearnMore,
+  onGoToInvestments,
 }: InvestmentSuggestionProps) {
   const riskColors = {
     low: "text-finance-green",
@@ -52,24 +54,9 @@ export default function InvestmentSuggestion({
           <p className="text-lg font-semibold mb-2">
             {availableAmount.toLocaleString()} ₽
           </p>
-          <div className="text-xs text-muted-foreground space-y-1.5">
-            <div className="flex justify-between">
-              <span>Всего на счетах:</span>
-              <span>209,590₽</span>
-            </div>
-            <div className="flex justify-between">
-              <span>− Обяз. платежи:</span>
-              <span>15,000₽</span>
-            </div>
-            <div className="flex justify-between">
-              <span>− Резерв:</span>
-              <span>50,000₽</span>
-            </div>
-            <div className="flex justify-between">
-              <span>− Расходы месяца:</span>
-              <span>43,250₽</span>
-            </div>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Сумма добавлена через модуль инвестиций и готова к вложению
+          </p>
         </div>
 
         {/* Рекомендация */}
@@ -164,29 +151,43 @@ export default function InvestmentSuggestion({
         </div>
 
         {/* Действия */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => window.open(partnerAppUrl, '_blank')}
-            className="flex-1 bg-finance-green hover:bg-finance-green/90"
-          >
-            <ExternalLink size={18} className="mr-2" />
-            Открыть в Т-Инвестициях
-          </Button>
-          <Button
-            onClick={onLearnMore}
-            variant="outline"
-            size="icon"
-            className="shrink-0"
-          >
-            <Info size={18} />
-          </Button>
+        <div className="space-y-2">
+          {onGoToInvestments && (
+            <Button
+              onClick={onGoToInvestments}
+              className="w-full bg-finance-blue hover:bg-finance-blue/90"
+            >
+              <TrendingUp size={18} className="mr-2" />
+              Перейти в модуль инвестиций
+            </Button>
+          )}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => window.open(partnerAppUrl, '_blank')}
+              variant="outline"
+              className="flex-1"
+            >
+              <ExternalLink size={18} className="mr-2" />
+              Открыть в Т-Инвестициях
+            </Button>
+            {onLearnMore && (
+              <Button
+                onClick={onLearnMore}
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+              >
+                <Info size={18} />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Подсказка */}
         <div className="flex items-start gap-2 text-xs text-muted-foreground">
           <Info size={14} className="shrink-0 mt-0.5" />
           <p>
-            Расчет основан на балансе ваших счетов (Альфа-Банк: 84,590₽ + Сбербанк: 125,000₽) минус обязательные расходы и резервный фонд
+            Расчет основан на средствах, которые вы добавили для инвестирования. Вы можете добавить или изменить сумму в модуле инвестиций.
           </p>
         </div>
       </div>

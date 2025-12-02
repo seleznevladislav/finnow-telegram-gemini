@@ -10,6 +10,7 @@ import {
   ArrowUpDown,
   BarChart2,
   Calendar,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -19,11 +20,13 @@ import TransactionItem from "@/components/TransactionItem";
 import AIInsightTrigger from "@/components/ai/AIInsightTrigger";
 import AIInsightsStories from "@/components/ai/AIInsightsStories";
 import { useTelegram } from "@/hooks/useTelegram";
+import { useInvestment } from "@/contexts/InvestmentContext";
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { TG, user } = useTelegram();
+  const { totalAvailable } = useInvestment();
   const [isAISheetOpen, setIsAISheetOpen] = useState(false);
 
   useEffect(() => {
@@ -96,15 +99,9 @@ export default function Dashboard() {
 
   const userName = user?.first_name || "Пользователь";
 
-  // Расчет доступной суммы для инвестиций
+  // Используем реальную сумму из InvestmentContext
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
   const monthlyExpenses = 43250; // Из StatCard
-  const obligatoryPayments = 15000; // ЖКХ, связь, подписки
-  const safetyBuffer = 50000; // Резервный фонд
-  const availableForInvestment = Math.max(
-    0,
-    totalBalance - obligatoryPayments - safetyBuffer - monthlyExpenses
-  );
 
   return (
     <div className="pb-20">
@@ -158,9 +155,12 @@ export default function Dashboard() {
         {/* AI Insight Trigger */}
         <div className="mb-6">
           <AIInsightTrigger
-            savingsAmount={Math.floor(availableForInvestment)}
-            insightText={`После всех обязательных платежей у тебя остается ${Math.floor(availableForInvestment).toLocaleString()}₽ — можно инвестировать для защиты от инфляции`}
-            onClick={() => setIsAISheetOpen(true)}
+            savingsAmount={Math.floor(totalAvailable)}
+            insightText={totalAvailable > 0
+              ? `У тебя есть ${Math.floor(totalAvailable).toLocaleString()}₽ для инвестирования — можно защитить от инфляции и получить доход`
+              : "Добавь средства для инвестирования через кнопку ниже"
+            }
+            onClick={() => totalAvailable > 0 ? setIsAISheetOpen(true) : navigate("/investments")}
           />
         </div>
 
@@ -178,11 +178,11 @@ export default function Dashboard() {
             </div>
             <span className="text-xs">Оплата</span>
           </div>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/investments")}>
             <div className="w-12 h-12 bg-muted/30 flex items-center justify-center rounded-full mb-1">
-              <BarChart2 size={20} className="text-finance-green" />
+              <TrendingUp size={20} className="text-finance-green" />
             </div>
-            <span className="text-xs">Отчеты</span>
+            <span className="text-xs">Инвестиции</span>
           </div>
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 bg-muted/30 flex items-center justify-center rounded-full mb-1">
@@ -256,7 +256,7 @@ export default function Dashboard() {
       <AIInsightsStories
         isOpen={isAISheetOpen}
         onClose={() => setIsAISheetOpen(false)}
-        availableAmount={Math.floor(availableForInvestment)}
+        availableAmount={Math.floor(totalAvailable)}
         totalBalance={totalBalance}
         monthlyExpenses={monthlyExpenses}
       />

@@ -845,3 +845,330 @@ const getFallbackResponse = (userMessage: string): string => {
   // Дефолтный ответ
   return `Понял ваш вопрос! 🤔 Могу помочь с:\n• Выбором карты для покупок\n• Анализом расходов\n• Советами по экономии\n• Прогнозом бюджета\n• Рекомендациями по инвестициям\n\nУточните, что именно вас интересует?`;
 };
+
+// Функция для получения AI-совета по инвестициям
+export const getInvestmentAdvice = async (amount: number, bondYield: number, timeframe: number): Promise<string> => {
+  const HF_API_KEY = import.meta.env.VITE_HF_API_KEY || "hf_demo_key";
+  const HF_MODEL = "meta-llama/Llama-3.1-8B-Instruct";
+
+  // Если API ключ не настроен, используем fallback
+  if (HF_API_KEY === "hf_demo_key" || !HF_API_KEY) {
+    return getFallbackInvestmentAdvice(amount, bondYield, timeframe);
+  }
+
+  try {
+    const client = new OpenAI({
+      baseURL: "https://router.huggingface.co/v1",
+      apiKey: HF_API_KEY,
+      dangerouslyAllowBrowser: true,
+    });
+
+    const expectedProfit = Math.floor(amount * (bondYield / 100) * timeframe);
+
+    const prompt = `Пользователь планирует инвестировать ${amount.toLocaleString()} рублей в ОФЗ 26238 (облигации федерального займа РФ) с доходностью ${bondYield}% годовых на срок ${timeframe} года. Ожидаемая прибыль: ${expectedProfit.toLocaleString()} рублей.
+
+Как финансовый советник, дай краткую позитивную оценку этого плана (2-3 предложения):
+- Почему ОФЗ - разумный выбор для консервативного инвестора
+- Что важно учесть при таком вложении
+- Как можно диверсифицировать портфель
+
+Твой ответ должен поддерживать решение и быть конструктивным. Используй эмодзи 💼 в начале.`;
+
+    const response = await client.chat.completions.create({
+      model: HF_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "Ты опытный финансовый советник который помогает людям принимать взвешенные инвестиционные решения. Ты позитивный, конструктивный и даешь практичные советы на русском языке. Ты поддерживаешь разумные консервативные решения."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 250,
+      temperature: 0.7,
+      top_p: 0.9,
+    });
+
+    const aiResponse = response.choices?.[0]?.message?.content || "";
+
+    if (!aiResponse || aiResponse.length < 10) {
+      return getFallbackInvestmentAdvice(amount, bondYield, timeframe);
+    }
+
+    return aiResponse.trim();
+  } catch (error) {
+    console.error("Ошибка получения AI-совета:", error);
+    return getFallbackInvestmentAdvice(amount, bondYield, timeframe);
+  }
+};
+
+// Fallback совет по инвестициям
+const getFallbackInvestmentAdvice = (amount: number, bondYield: number, timeframe: number): string => {
+  const expectedProfit = Math.floor(amount * (bondYield / 100) * timeframe);
+
+  return `💼 ОФЗ с доходностью ${bondYield}% - надёжный выбор для консервативного инвестора. За ${timeframe} года вы заработаете ~${expectedProfit.toLocaleString()}₽. Основные риски: инфляция может съесть часть прибыли. Рекомендация: это хорошая база портфеля (60-70%), остальное можно вложить в более доходные, но рискованные инструменты.`;
+};
+
+// Типы для плана инвестиций
+export type RiskLevel = 'low' | 'medium' | 'high';
+
+export interface InvestmentInstrument {
+  id: string;
+  name: string;
+  type: string;
+  allocation: number;
+  amount: number;
+  expectedYield: number;
+  description: string;
+  riskLevel: RiskLevel;
+}
+
+export interface GeneratedInvestmentPlan {
+  instruments: InvestmentInstrument[];
+  expectedYield: number;
+  timeframe: string;
+  aiReasoning: string;
+}
+
+// Функция для генерации персонального плана инвестиций через AI
+export const generateInvestmentPlan = async (
+  amount: number,
+  riskLevel: RiskLevel
+): Promise<GeneratedInvestmentPlan> => {
+  const HF_API_KEY = import.meta.env.VITE_HF_API_KEY || "hf_demo_key";
+  const HF_MODEL = "meta-llama/Llama-3.1-8B-Instruct";
+
+  // Если API ключ не настроен, используем fallback
+  if (HF_API_KEY === "hf_demo_key" || !HF_API_KEY) {
+    return getFallbackInvestmentPlan(amount, riskLevel);
+  }
+
+  try {
+    const client = new OpenAI({
+      baseURL: "https://router.huggingface.co/v1",
+      apiKey: HF_API_KEY,
+      dangerouslyAllowBrowser: true,
+    });
+
+    const riskDescriptions = {
+      low: "низкий (консервативный, защита капитала)",
+      medium: "средний (сбалансированный, умеренный рост)",
+      high: "высокий (агрессивный, максимальный доход)"
+    };
+
+    const prompt = `Создай персональный план инвестиций для российского инвестора.
+
+Параметры:
+- Сумма: ${amount.toLocaleString()} рублей
+- Уровень риска: ${riskDescriptions[riskLevel]}
+
+Составь диверсифицированный портфель из 3-4 инструментов. Используй:
+- Для низкого риска: ОФЗ (60-80%), корпоративные облигации (20-30%), акции голубых фишек (0-10%)
+- Для среднего риска: ОФЗ/облигации (40-50%), акции (40-50%), золото/ETF (10%)
+- Для высокого риска: акции роста (50-60%), крипто (20-30%), венчур/ETF (20%)
+
+Верни ТОЛЬКО валидный JSON в таком формате (без дополнительного текста):
+{
+  "instruments": [
+    {
+      "name": "Название инструмента",
+      "type": "Тип (Облигации/Акции/Крипто/ETF)",
+      "allocation": число от 0 до 100 (процент),
+      "expectedYield": число (ожидаемая доходность в % годовых),
+      "description": "Краткое описание (1 предложение)"
+    }
+  ],
+  "expectedYield": число (средняя доходность портфеля в %),
+  "timeframe": "строка (рекомендуемый срок инвестирования)",
+  "aiReasoning": "Краткая аргументация выбора (2-3 предложения)"
+}
+
+Важно: allocation должны в сумме давать 100. Используй реальные российские инструменты.`;
+
+    const response = await client.chat.completions.create({
+      model: HF_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "Ты финансовый советник для российского рынка. Возвращай ТОЛЬКО валидный JSON, без дополнительного текста или markdown."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 800,
+      temperature: 0.7,
+      top_p: 0.9,
+    });
+
+    const aiResponse = response.choices?.[0]?.message?.content || "";
+
+    if (!aiResponse || aiResponse.length < 10) {
+      return getFallbackInvestmentPlan(amount, riskLevel);
+    }
+
+    // Парсим JSON из ответа
+    try {
+      // Извлекаем JSON из ответа (может быть обернут в ```json```)
+      let jsonStr = aiResponse.trim();
+      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+
+      const parsed = JSON.parse(jsonStr);
+
+      // Валидация и добавление недостающих полей
+      if (!parsed.instruments || !Array.isArray(parsed.instruments)) {
+        throw new Error("Invalid instruments array");
+      }
+
+      const instruments: InvestmentInstrument[] = parsed.instruments.map((inst: any, idx: number) => ({
+        id: `inst-${Date.now()}-${idx}`,
+        name: inst.name || "Неизвестный инструмент",
+        type: inst.type || "Другое",
+        allocation: Number(inst.allocation) || 0,
+        amount: Math.floor(amount * (Number(inst.allocation) || 0) / 100),
+        expectedYield: Number(inst.expectedYield) || 0,
+        description: inst.description || "",
+        riskLevel: riskLevel,
+      }));
+
+      return {
+        instruments,
+        expectedYield: Number(parsed.expectedYield) || 10,
+        timeframe: parsed.timeframe || "1-2 года",
+        aiReasoning: parsed.aiReasoning || "Этот портфель подобран с учетом вашего уровня риска.",
+      };
+    } catch (parseError) {
+      console.error("Ошибка парсинга AI ответа:", parseError);
+      console.log("AI ответ:", aiResponse);
+      return getFallbackInvestmentPlan(amount, riskLevel);
+    }
+  } catch (error) {
+    console.error("Ошибка генерации плана:", error);
+    return getFallbackInvestmentPlan(amount, riskLevel);
+  }
+};
+
+// Fallback план инвестиций
+const getFallbackInvestmentPlan = (amount: number, riskLevel: RiskLevel): GeneratedInvestmentPlan => {
+  const plans = {
+    low: {
+      instruments: [
+        {
+          id: "ofz-1",
+          name: "ОФЗ 26238",
+          type: "Облигации",
+          allocation: 70,
+          amount: Math.floor(amount * 0.7),
+          expectedYield: 12.5,
+          description: "Государственные облигации РФ с фиксированной доходностью",
+          riskLevel: 'low' as RiskLevel,
+        },
+        {
+          id: "corp-bonds-1",
+          name: "Корпоративные облигации",
+          type: "Облигации",
+          allocation: 25,
+          amount: Math.floor(amount * 0.25),
+          expectedYield: 14.0,
+          description: "Облигации надежных российских компаний (Газпром, Сбербанк)",
+          riskLevel: 'low' as RiskLevel,
+        },
+        {
+          id: "stocks-1",
+          name: "Акции голубых фишек",
+          type: "Акции",
+          allocation: 5,
+          amount: Math.floor(amount * 0.05),
+          expectedYield: 15.0,
+          description: "Акции крупнейших компаний ММВБ (Сбербанк, Газпром, Лукойл)",
+          riskLevel: 'low' as RiskLevel,
+        },
+      ],
+      expectedYield: 12.8,
+      timeframe: "2-3 года",
+      aiReasoning: "Консервативный портфель ориентирован на защиту капитала и стабильный доход. 95% в облигациях обеспечивают надежность, небольшая доля акций добавляет потенциал роста.",
+    },
+    medium: {
+      instruments: [
+        {
+          id: "ofz-2",
+          name: "ОФЗ и корп. облигации",
+          type: "Облигации",
+          allocation: 45,
+          amount: Math.floor(amount * 0.45),
+          expectedYield: 13.0,
+          description: "Смесь государственных и корпоративных облигаций для стабильности",
+          riskLevel: 'medium' as RiskLevel,
+        },
+        {
+          id: "stocks-2",
+          name: "Российские акции",
+          type: "Акции",
+          allocation: 40,
+          amount: Math.floor(amount * 0.4),
+          expectedYield: 18.0,
+          description: "Диверсифицированный портфель акций ММВБ с потенциалом роста",
+          riskLevel: 'medium' as RiskLevel,
+        },
+        {
+          id: "gold-etf-1",
+          name: "Золото / ETF",
+          type: "ETF",
+          allocation: 15,
+          amount: Math.floor(amount * 0.15),
+          expectedYield: 8.0,
+          description: "Защитный актив для хеджирования рисков",
+          riskLevel: 'medium' as RiskLevel,
+        },
+      ],
+      expectedYield: 14.5,
+      timeframe: "1-2 года",
+      aiReasoning: "Сбалансированный портфель сочетает надежность облигаций с потенциалом роста акций. Золото служит защитой от волатильности рынка.",
+    },
+    high: {
+      instruments: [
+        {
+          id: "growth-stocks-1",
+          name: "Акции роста",
+          type: "Акции",
+          allocation: 50,
+          amount: Math.floor(amount * 0.5),
+          expectedYield: 25.0,
+          description: "Акции быстрорастущих технологических компаний и второго эшелона",
+          riskLevel: 'high' as RiskLevel,
+        },
+        {
+          id: "crypto-1",
+          name: "Криптовалюты",
+          type: "Крипто",
+          allocation: 30,
+          amount: Math.floor(amount * 0.3),
+          expectedYield: 40.0,
+          description: "BTC и ETH для высокой доходности при повышенном риске",
+          riskLevel: 'high' as RiskLevel,
+        },
+        {
+          id: "tech-etf-1",
+          name: "Технологические ETF",
+          type: "ETF",
+          allocation: 20,
+          amount: Math.floor(amount * 0.2),
+          expectedYield: 20.0,
+          description: "Фонды технологических компаний для диверсификации",
+          riskLevel: 'high' as RiskLevel,
+        },
+      ],
+      expectedYield: 28.0,
+      timeframe: "6-12 месяцев",
+      aiReasoning: "Агрессивный портфель нацелен на максимальную доходность. Высокая доля акций роста и криптовалют дает потенциал значительного увеличения капитала, но требует готовности к волатильности.",
+    },
+  };
+
+  return plans[riskLevel];
+};

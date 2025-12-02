@@ -12,9 +12,11 @@ import AccountDetail from "./pages/AccountDetail";
 import Transactions from "./pages/Transactions";
 import Analytics from "./pages/Analytics";
 import Chat from "./pages/Chat";
+import Investments from "./pages/Investments";
 import BottomNavigation from "./components/BottomNavigation";
 import { useTelegram } from "./hooks/useTelegram";
 import { logUserLogin, createLoginEvent } from "./services/logger";
+import { InvestmentProvider } from "./contexts/InvestmentContext";
 
 const queryClient = new QueryClient();
 
@@ -52,27 +54,30 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className={`max-w-md mx-auto min-h-screen pb-16 routeContainer ${isMobile ? 'pt-20' : ''}`}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/accounts" element={<Accounts />} />
-              <Route path="/accounts/:id" element={<AccountDetail />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/chat" element={<Chat />} />
+      <InvestmentProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className={`max-w-md mx-auto min-h-screen pb-16 routeContainer ${isMobile ? 'pt-20' : ''}`}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/accounts" element={<Accounts />} />
+                <Route path="/accounts/:id" element={<AccountDetail />} />
+                <Route path="/transactions" element={<Transactions />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/investments" element={<Investments />} />
 
-              {/* Add redirects for invalid routes */}
-              <Route path="/404" element={<NotFound />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-            <BottomNavigation />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
+                {/* Add redirects for invalid routes */}
+                <Route path="/404" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+              <BottomNavigation />
+            </div>
+          </BrowserRouter>
+        </TooltipProvider>
+      </InvestmentProvider>
     </QueryClientProvider>
   );
 };
