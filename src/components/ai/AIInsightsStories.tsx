@@ -252,7 +252,7 @@ export default function AIInsightsStories({
         onTouchEnd={() => setIsPaused(false)}
       >
         {/* Header with Progress Bars */}
-        <div className="fixed top-0 left-0 right-0 z-50 pt-20 px-4 pb-2 bg-gradient-to-b from-black/90 via-black/60 to-transparent">
+        <div className="fixed top-0 left-0 right-0 z-50 pt-24 px-4 pb-2 bg-gradient-to-b from-black/90 via-black/60 to-transparent">
           {/* Progress Indicators */}
           <div className="flex gap-1 mb-4">
             {Array.from({ length: totalStories }).map((_, index) => (
@@ -297,7 +297,7 @@ export default function AIInsightsStories({
         </div>
 
         {/* Story Content */}
-        <div className="h-full pt-36">
+        <div className="h-full pt-40">
           {stories[currentStory]}
         </div>
 

@@ -109,7 +109,7 @@ export default function Dashboard() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background px-4 pt-6 pb-6 flex items-center justify-between border-b border-border">
         <div>
           <p className="text-muted-foreground text-sm">Привет,</p>
           <h1 className="text-xl font-semibold">{userName}</h1>
