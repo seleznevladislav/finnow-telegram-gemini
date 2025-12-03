@@ -1,0 +1,70 @@
+# ============================================================================
+# NETLIFY CONFIGURATION
+# ============================================================================
+#
+# Конфигурация для деплоя FinNow Telegram Mini App на Netlify
+#
+# Документация: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+# Build settings
+[build]
+  # Команда для сборки приложения
+  command = "npm run build"
+
+  # Директория с собранными файлами для публикации
+  publish = "dist"
+
+  # Директория с Netlify Functions
+  functions = "netlify/functions"
+
+# Переменные окружения для сборки
+[build.environment]
+  # Node.js версия
+  NODE_VERSION = "18"
+
+# Redirect rules для SPA (Single Page Application)
+# Все запросы перенаправляются на index.html для работы React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  # Исключаем API endpoints из redirect
+  conditions = {Role = [""], Country = []}
+  force = false
+
+# Headers для безопасности и производительности
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Безопасность
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # CORS для API endpoints (будет переопределено в функциях)
+    Access-Control-Allow-Origin = "*"
+
+# Кэширование статических ресурсов
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Headers для Netlify Functions
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Cache-Control = "public, s-maxage=300, stale-while-revalidate=60"
+
+# Dev server настройки для локальной разработки
+[dev]
+  command = "npm run dev"
+  port = 8080
+  publish = "dist"
+  functions = "netlify/functions"
+  # Автоматически открывать браузер
+  autoLaunch = false
