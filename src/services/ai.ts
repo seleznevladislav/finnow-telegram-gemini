@@ -187,6 +187,14 @@ async function getCurrencyRates(): Promise<CurrencyRate[]> {
 // Управляется переменной окружения VITE_USE_NETLIFY_MOEX
 const USE_REAL_MOEX_API = import.meta.env.VITE_USE_NETLIFY_MOEX === 'true';
 
+// Отладочный лог для диагностики
+console.log('🔍 MOEX API Configuration:', {
+  VITE_USE_NETLIFY_MOEX: import.meta.env.VITE_USE_NETLIFY_MOEX,
+  USE_REAL_MOEX_API,
+  type: typeof import.meta.env.VITE_USE_NETLIFY_MOEX,
+  allEnvVars: import.meta.env
+});
+
 // URL для Netlify Functions
 // Автоматически определяется или берется из переменной окружения
 const getNetlifyFunctionsUrl = () => {
