@@ -1,73 +1,38 @@
-// ============================================================================
-// NETLIFY FUNCTION: MOEX BONDS PROXY
-// ============================================================================
-//
-// Эта serverless функция проксирует запросы к MOEX ISS API для получения
-// котировок российских облигаций (ОФЗ). Решает проблему CORS.
-//
-// Endpoint: /.netlify/functions/moex-bonds
-// Method: GET
-// Response: JSON с котировками облигаций
-
+// Proxy для получения котировок облигаций MOEX (решает проблему CORS)
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
-  // Разрешаем CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Content-Type': 'application/json',
-    // Кэшируем на 5 минут (300 секунд)
     'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60'
   };
 
-  // Обрабатываем preflight запросы
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: ''
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
   try {
-    console.log('📊 Fetching MOEX bonds data...');
-
-    // Популярные ОФЗ (облигации федерального займа)
     const tickers = ['SU26238RMFS4', 'SU26240RMFS9', 'SU26241RMFS7'];
-
-    // MOEX ISS API endpoint для облигаций
     const moexUrl = `https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json?securities=${tickers.join(',')}`;
 
     const response = await fetch(moexUrl);
-
-    if (!response.ok) {
-      throw new Error(`MOEX API error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`MOEX API error: ${response.status}`);
 
     const data = await response.json();
-
-    // Проверяем наличие данных
-    if (!data.securities || !data.marketdata) {
-      throw new Error('Invalid MOEX API response format');
-    }
+    if (!data.securities || !data.marketdata) throw new Error('Invalid response');
 
     const securities = data.securities;
     const marketdata = data.marketdata;
 
-    // Создаём индекс колонок
     const secColIndex = {};
-    securities.columns.forEach((col, idx) => {
-      secColIndex[col] = idx;
-    });
+    securities.columns.forEach((col, idx) => { secColIndex[col] = idx; });
 
     const mktColIndex = {};
-    marketdata.columns.forEach((col, idx) => {
-      mktColIndex[col] = idx;
-    });
+    marketdata.columns.forEach((col, idx) => { mktColIndex[col] = idx; });
 
-    // Собираем данные по каждой облигации
     const bonds = [];
 
     for (let i = 0; i < securities.data.length; i++) {
@@ -95,8 +60,6 @@ exports.handler = async function(event, context) {
       }
     }
 
-    console.log(`✅ Successfully fetched ${bonds.length} bonds`);
-
     return {
       statusCode: 200,
       headers,
@@ -106,16 +69,14 @@ exports.handler = async function(event, context) {
         data: bonds
       })
     };
-
   } catch (error) {
-    console.error('❌ Error fetching MOEX bonds:', error);
-
+    console.error('Error fetching MOEX bonds:', error);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: error.message || 'Failed to fetch MOEX bonds data'
+        error: error.message || 'Failed to fetch bonds'
       })
     };
   }

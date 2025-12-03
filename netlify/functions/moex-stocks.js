@@ -1,75 +1,38 @@
-// ============================================================================
-// NETLIFY FUNCTION: MOEX STOCKS PROXY
-// ============================================================================
-//
-// Эта serverless функция проксирует запросы к MOEX ISS API для получения
-// котировок российских акций. Решает проблему CORS для браузерных приложений.
-//
-// Endpoint: /.netlify/functions/moex-stocks
-// Method: GET
-// Response: JSON с котировками акций
-
+// Proxy для получения котировок акций MOEX (решает проблему CORS)
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
-  // Разрешаем CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Content-Type': 'application/json',
-    // Кэшируем на 5 минут (300 секунд)
     'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60'
   };
 
-  // Обрабатываем preflight запросы
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: ''
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
   try {
-    console.log('📊 Fetching MOEX stocks data...');
-
-    // Популярные российские акции
     const tickers = ['SBER', 'GAZP', 'YDEX', 'LKOH', 'GMKN'];
-
-    // MOEX ISS API endpoint
-    // Документация: https://iss.moex.com/iss/reference/
     const moexUrl = `https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?securities=${tickers.join(',')}`;
 
     const response = await fetch(moexUrl);
-
-    if (!response.ok) {
-      throw new Error(`MOEX API error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`MOEX API error: ${response.status}`);
 
     const data = await response.json();
+    if (!data.securities || !data.marketdata) throw new Error('Invalid response');
 
-    // Проверяем наличие данных
-    if (!data.securities || !data.marketdata) {
-      throw new Error('Invalid MOEX API response format');
-    }
-
-    // Парсим данные в удобный формат
     const securities = data.securities;
     const marketdata = data.marketdata;
 
-    // Создаём индекс колонок
     const secColIndex = {};
-    securities.columns.forEach((col, idx) => {
-      secColIndex[col] = idx;
-    });
+    securities.columns.forEach((col, idx) => { secColIndex[col] = idx; });
 
     const mktColIndex = {};
-    marketdata.columns.forEach((col, idx) => {
-      mktColIndex[col] = idx;
-    });
+    marketdata.columns.forEach((col, idx) => { mktColIndex[col] = idx; });
 
-    // Собираем данные по каждой акции
     const stocks = [];
 
     for (let i = 0; i < securities.data.length; i++) {
@@ -95,8 +58,6 @@ exports.handler = async function(event, context) {
       }
     }
 
-    console.log(`✅ Successfully fetched ${stocks.length} stocks`);
-
     return {
       statusCode: 200,
       headers,
@@ -106,16 +67,14 @@ exports.handler = async function(event, context) {
         data: stocks
       })
     };
-
   } catch (error) {
-    console.error('❌ Error fetching MOEX stocks:', error);
-
+    console.error('Error fetching MOEX stocks:', error);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: error.message || 'Failed to fetch MOEX stocks data'
+        error: error.message || 'Failed to fetch stocks'
       })
     };
   }

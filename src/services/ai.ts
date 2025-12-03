@@ -1,39 +1,4 @@
-// ============================================================================
-// AI СЕРВИС ДЛЯ FINNOW TELEGRAM MINI APP
-// ============================================================================
-//
-// Этот модуль управляет интеграцией с AI (Llama-3.1-8B-Instruct через HuggingFace)
-// и получением актуальных рыночных данных (криптовалюты, валюты, акции, облигации)
-//
-// ВАЖНО: Это Telegram Mini App (работает в браузере внутри Telegram)
-//
-// ТЕКУЩИЕ ОГРАНИЧЕНИЯ:
-// 1. OpenAI SDK требует флаг dangerouslyAllowBrowser: true для работы в браузере
-// 2. MOEX API НЕ поддерживает CORS запросы из браузера - используются моковые данные
-//
-// ДЛЯ PRODUCTION РЕКОМЕНДУЕТСЯ:
-// Создать простой backend proxy на Node.js/Vercel/Netlify для:
-//   - Безопасных запросов к AI без раскрытия API ключа
-//   - Проксирования запросов к MOEX API (решение проблемы CORS)
-//   - Кэширования данных и снижения нагрузки на внешние API
-//
-// Пример простого backend proxy на Vercel (serverless function):
-//
-// // api/moex-proxy.js
-// export default async function handler(req, res) {
-//   const response = await fetch('https://iss.moex.com/iss/...');
-//   const data = await response.json();
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.json(data);
-// }
-//
-// Затем в коде заменить:
-//   const response = await fetch('https://iss.moex.com/...');
-// на:
-//   const response = await fetch('https://your-app.vercel.app/api/moex-proxy');
-//
-// ============================================================================
-
+// AI сервис для FinNow - интеграция с HuggingFace и получение рыночных данных
 import { OpenAI } from "openai";
 
 interface Message {
@@ -41,11 +6,7 @@ interface Message {
   content: string;
 }
 
-// ============================================================================
-// ФУНКЦИИ ДЛЯ ПОЛУЧЕНИЯ АКТУАЛЬНЫХ ДАННЫХ ИЗ ИНТЕРНЕТА
-// ============================================================================
-
-// Интерфейсы для данных
+// Интерфейсы для рыночных данных
 interface CryptoPrice {
   symbol: string;
   name: string;
@@ -78,7 +39,7 @@ interface BondPrice {
   maturityDate?: string;    // Дата погашения
 }
 
-// Кэш для котировок (чтобы не спамить API при каждом сообщении)
+// Кэш для котировок (5 минут)
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -95,16 +56,11 @@ function isCacheValid<T>(cache: CacheEntry<T> | null): boolean {
   return Date.now() - cache.timestamp < CACHE_DURATION;
 }
 
-// Получение котировок криптовалют через CoinGecko API (бесплатный, без ключа)
+// Получение котировок криптовалют (CoinGecko API)
 async function getCryptoPrices(): Promise<CryptoPrice[]> {
-  // Проверяем кэш
-  if (isCacheValid(cryptoCache)) {
-    console.log('📦 Используем кэшированные котировки криптовалют');
-    return cryptoCache!.data;
-  }
+  if (isCacheValid(cryptoCache)) return cryptoCache!.data;
 
   try {
-    console.log('🌐 Получаем свежие котировки криптовалют...');
     const response = await fetch(
       'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,tether,binancecoin&order=market_cap_desc&sparkline=false'
     );
@@ -122,34 +78,20 @@ async function getCryptoPrices(): Promise<CryptoPrice[]> {
       price_change_percentage_24h: coin.price_change_percentage_24h,
     }));
 
-    // Сохраняем в кэш
-    cryptoCache = {
-      data: prices,
-      timestamp: Date.now(),
-    };
-
+    cryptoCache = { data: prices, timestamp: Date.now() };
     return prices;
   } catch (error) {
     console.error('Ошибка получения криптовалютных котировок:', error);
-    // Если есть старый кэш, используем его
-    if (cryptoCache) {
-      console.log('⚠️ Используем устаревший кэш криптовалют');
-      return cryptoCache.data;
-    }
+    if (cryptoCache) return cryptoCache.data;
     return [];
   }
 }
 
-// Получение курсов валют через Exchangerate API (бесплатный)
+// Получение курсов валют (Exchangerate API)
 async function getCurrencyRates(): Promise<CurrencyRate[]> {
-  // Проверяем кэш
-  if (isCacheValid(currencyCache)) {
-    console.log('📦 Используем кэшированные курсы валют');
-    return currencyCache!.data;
-  }
+  if (isCacheValid(currencyCache)) return currencyCache!.data;
 
   try {
-    console.log('🌐 Получаем свежие курсы валют...');
     const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
 
     if (!response.ok) {
@@ -157,80 +99,44 @@ async function getCurrencyRates(): Promise<CurrencyRate[]> {
     }
 
     const data = await response.json();
-
-    // Берём основные валюты относительно доллара
     const currencies = ['EUR', 'RUB', 'CNY', 'JPY'];
     const rates = currencies.map(currency => ({
       currency,
       rate: data.rates[currency],
     }));
 
-    // Сохраняем в кэш
-    currencyCache = {
-      data: rates,
-      timestamp: Date.now(),
-    };
-
+    currencyCache = { data: rates, timestamp: Date.now() };
     return rates;
   } catch (error) {
     console.error('Ошибка получения курсов валют:', error);
-    // Если есть старый кэш, используем его
-    if (currencyCache) {
-      console.log('⚠️ Используем устаревший кэш валют');
-      return currencyCache.data;
-    }
+    if (currencyCache) return currencyCache.data;
     return [];
   }
 }
 
 // Флаг для использования реального MOEX API через Netlify Functions
-// Управляется переменной окружения VITE_USE_NETLIFY_MOEX
 const USE_REAL_MOEX_API = import.meta.env.VITE_USE_NETLIFY_MOEX === 'true';
 
-// Отладочный лог для диагностики
-console.log('🔍 MOEX API Configuration:', {
-  VITE_USE_NETLIFY_MOEX: import.meta.env.VITE_USE_NETLIFY_MOEX,
-  USE_REAL_MOEX_API,
-  type: typeof import.meta.env.VITE_USE_NETLIFY_MOEX,
-  allEnvVars: import.meta.env
-});
-
-// URL для Netlify Functions
-// Автоматически определяется или берется из переменной окружения
 const getNetlifyFunctionsUrl = () => {
-  // Если явно указан URL в .env
   if (import.meta.env.VITE_NETLIFY_FUNCTIONS_URL) {
     return import.meta.env.VITE_NETLIFY_FUNCTIONS_URL;
   }
 
-  // Автоматическое определение
   if (typeof window !== 'undefined') {
-    // Production: используем текущий хост
     if (window.location.hostname !== 'localhost') {
       return `${window.location.origin}/.netlify/functions`;
     }
-    // Локальная разработка с Netlify Dev (netlify dev запускается на порту 8888)
     return 'http://localhost:8888/.netlify/functions';
   }
 
-  // Fallback
   return '/.netlify/functions';
 };
 
-// Получение котировок акций через MOEX API (Московская Биржа, бесплатный API)
-// ВАЖНО: MOEX API не поддерживает CORS запросы из браузера
-// Для production необходимо создать backend endpoint, который будет проксировать запросы к MOEX
-// Сейчас используются моковые данные для разработки
+// Получение котировок акций MOEX (через Netlify Functions или моки)
 async function getStockPrices(): Promise<StockPrice[]> {
-  // Проверяем кэш
-  if (isCacheValid(stocksCache)) {
-    console.log('📦 Используем кэшированные котировки акций');
-    return stocksCache!.data;
-  }
+  if (isCacheValid(stocksCache)) return stocksCache!.data;
 
-  // Моковые данные для разработки (используются по умолчанию)
-  // ВАЖНО: Данные обновлены 4 декабря 2024 г. на основе реальных котировок MOEX
-  // Для production рекомендуется использовать backend proxy для получения актуальных данных
+  // Моковые данные (обновлены 4 декабря 2024)
   const mockStocks: StockPrice[] = [
     {
       ticker: 'SBER',
@@ -274,77 +180,36 @@ async function getStockPrices(): Promise<StockPrice[]> {
     },
   ];
 
-  // Если реальный API не включен, сразу возвращаем моки
   if (!USE_REAL_MOEX_API) {
-    console.log('💡 Используем моковые данные акций (режим разработки)');
-    stocksCache = {
-      data: mockStocks,
-      timestamp: Date.now(),
-    };
+    stocksCache = { data: mockStocks, timestamp: Date.now() };
     return mockStocks;
   }
 
-  // Попытка получить реальные данные через Netlify Functions
   try {
-    console.log('🌐 Получаем свежие котировки акций через Netlify Functions...');
-
     const functionsUrl = getNetlifyFunctionsUrl();
     const response = await fetch(`${functionsUrl}/moex-stocks`);
 
-    if (!response.ok) {
-      throw new Error(`Netlify Function error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Function error: ${response.status}`);
 
     const result = await response.json();
-
-    if (!result.success || !result.data) {
-      throw new Error('Invalid response from Netlify Function');
-    }
+    if (!result.success || !result.data) throw new Error('Invalid response');
 
     const stocks: StockPrice[] = result.data;
-
-    // Сохраняем в кэш
-    stocksCache = {
-      data: stocks,
-      timestamp: Date.now(),
-    };
-
-    console.log(`✅ Получено ${stocks.length} актуальных котировок акций`);
+    stocksCache = { data: stocks, timestamp: Date.now() };
     return stocks;
-
   } catch (error) {
-    console.error('Ошибка получения котировок акций через Netlify Functions:', error);
-    // Если есть старый кэш, используем его
-    if (stocksCache) {
-      console.log('⚠️ Используем устаревший кэш акций');
-      return stocksCache.data;
-    }
-
-    // Fallback: используем моковые данные
-    console.log('💡 Используем моковые данные акций (fallback)');
-    stocksCache = {
-      data: mockStocks,
-      timestamp: Date.now(),
-    };
-
+    console.error('Ошибка получения котировок акций:', error);
+    if (stocksCache) return stocksCache.data;
+    stocksCache = { data: mockStocks, timestamp: Date.now() };
     return mockStocks;
   }
 }
 
-// Получение котировок облигаций через MOEX API
-// ВАЖНО: MOEX API не поддерживает CORS запросы из браузера
-// Для production необходимо создать backend endpoint, который будет проксировать запросы к MOEX
-// Сейчас используются моковые данные для разработки
+// Получение котировок облигаций MOEX (через Netlify Functions или моки)
 async function getBondPrices(): Promise<BondPrice[]> {
-  // Проверяем кэш
-  if (isCacheValid(bondsCache)) {
-    console.log('📦 Используем кэшированные котировки облигаций');
-    return bondsCache!.data;
-  }
+  if (isCacheValid(bondsCache)) return bondsCache!.data;
 
-  // Моковые данные для разработки (используются по умолчанию)
-  // ВАЖНО: Данные обновлены 4 декабря 2024 г. на основе реальных котировок MOEX
-  // Для production рекомендуется использовать backend proxy для получения актуальных данных
+  // Моковые данные (обновлены 4 декабря 2024)
   const mockBonds: BondPrice[] = [
     {
       ticker: 'SU26238RMFS4',
@@ -375,59 +240,27 @@ async function getBondPrices(): Promise<BondPrice[]> {
     },
   ];
 
-  // Если реальный API не включен, сразу возвращаем моки
   if (!USE_REAL_MOEX_API) {
-    console.log('💡 Используем моковые данные облигаций (режим разработки)');
-    bondsCache = {
-      data: mockBonds,
-      timestamp: Date.now(),
-    };
+    bondsCache = { data: mockBonds, timestamp: Date.now() };
     return mockBonds;
   }
 
-  // Попытка получить реальные данные через Netlify Functions
   try {
-    console.log('🌐 Получаем свежие котировки облигаций через Netlify Functions...');
-
     const functionsUrl = getNetlifyFunctionsUrl();
     const response = await fetch(`${functionsUrl}/moex-bonds`);
 
-    if (!response.ok) {
-      throw new Error(`Netlify Function error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Function error: ${response.status}`);
 
     const result = await response.json();
-
-    if (!result.success || !result.data) {
-      throw new Error('Invalid response from Netlify Function');
-    }
+    if (!result.success || !result.data) throw new Error('Invalid response');
 
     const bonds: BondPrice[] = result.data;
-
-    // Сохраняем в кэш
-    bondsCache = {
-      data: bonds,
-      timestamp: Date.now(),
-    };
-
-    console.log(`✅ Получено ${bonds.length} актуальных котировок облигаций`);
+    bondsCache = { data: bonds, timestamp: Date.now() };
     return bonds;
-
   } catch (error) {
-    console.error('Ошибка получения котировок облигаций через Netlify Functions:', error);
-    // Если есть старый кэш, используем его
-    if (bondsCache) {
-      console.log('⚠️ Используем устаревший кэш облигаций');
-      return bondsCache.data;
-    }
-
-    // Fallback: используем моковые данные
-    console.log('💡 Используем моковые данные облигаций (fallback)');
-    bondsCache = {
-      data: mockBonds,
-      timestamp: Date.now(),
-    };
-
+    console.error('Ошибка получения котировок облигаций:', error);
+    if (bondsCache) return bondsCache.data;
+    bondsCache = { data: mockBonds, timestamp: Date.now() };
     return mockBonds;
   }
 }
