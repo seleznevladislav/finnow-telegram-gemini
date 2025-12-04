@@ -91,29 +91,29 @@ export default function Transactions() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="mr-2"
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-4 pt-2 pb-3 flex items-center justify-between relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-finance-blue/20 after:via-finance-purple/40 after:to-finance-blue/20">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
             onClick={() => navigate('/')}
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </Button>
-          <h1 className="text-xl font-semibold">История операций</h1>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-finance-blue to-finance-purple bg-clip-text text-transparent drop-shadow-sm">История операций</h1>
         </div>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="icon"
           className="rounded-full"
         >
-          <Calendar size={20} />
+          <Calendar size={18} />
         </Button>
       </div>
-      
+
       {/* Main content */}
-      <div className="animate-fade-in mt-4">
+      <div className="animate-fade-in">
         {/* Filters */}
         <div className="p-4">
           {/* Search & Filter */}

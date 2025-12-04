@@ -118,29 +118,30 @@ export default function Investments() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-16 pb-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-4 pt-2 pb-3 flex items-center justify-between relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-finance-green/20 after:via-finance-blue/40 after:to-finance-green/20">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => navigate("/")}
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={18} />
           </Button>
-          <h1 className="text-xl font-semibold">Инвестиции</h1>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-finance-green to-finance-blue bg-clip-text text-transparent drop-shadow-sm">Инвестиции</h1>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsAddFundsOpen(true)}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 text-xs h-8"
         >
-          <Plus size={16} />
+          <Plus size={14} />
           Добавить
         </Button>
       </div>
 
-      <div className="p-4 mt-4 animate-fade-in space-y-6">
+      <div className="p-4 animate-fade-in space-y-6">
         {/* Доступные средства */}
         <div className="neumorph p-5 rounded-xl">
           <p className="text-sm text-muted-foreground mb-1">

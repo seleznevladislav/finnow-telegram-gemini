@@ -106,14 +106,14 @@ export default function Dashboard() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-16 pb-6 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-4 pt-2 pb-3 flex items-center justify-between relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-finance-blue/20 after:via-finance-purple/40 after:to-finance-blue/20">
         <div>
-          <p className="text-muted-foreground text-sm">Привет,</p>
-          <h1 className="text-xl font-semibold">{userName}</h1>
+          <p className="text-muted-foreground text-xs">Привет,</p>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-finance-blue to-finance-purple bg-clip-text text-transparent drop-shadow-sm">{userName}</h1>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" className="rounded-full relative">
-            <Bell size={20} />
+            <Bell size={18} />
             <span className="absolute top-0 right-0 w-2 h-2 bg-finance-red rounded-full"></span>
           </Button>
           <ThemeToggle />
@@ -121,7 +121,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main content */}
-      <div className="p-4 mt-4 animate-fade-in">
+      <div className="p-4 animate-fade-in">
         {/* Search */}
         <div className="mb-6">
           <div className="flex items-center px-4 py-3 rounded-xl bg-muted/20 shadow-sm transition focus-within:ring-2 focus-within:ring-primary">

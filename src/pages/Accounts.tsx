@@ -142,21 +142,21 @@ export default function Accounts() {
   return (
     <div className="pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-background px-4 pt-16 pb-3 flex items-center justify-between border-b border-border">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-4 pt-2 pb-3 flex items-center justify-between relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-finance-blue/20 after:via-finance-purple/40 after:to-finance-blue/20">
         <div className="flex items-center">
-          <h1 className="text-xl font-semibold">Счета и карты</h1>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-finance-blue to-finance-purple bg-clip-text text-transparent drop-shadow-sm">Счета и карты</h1>
         </div>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="icon"
           className="rounded-full"
         >
-          <Plus size={20} />
+          <Plus size={18} />
         </Button>
       </div>
-      
+
       {/* Main content */}
-      <div className="p-4 mt-4 animate-fade-in">
+      <div className="p-4 animate-fade-in">
         {/* Total Balance */}
         <div className="neumorph p-4 mb-6">
           <p className="text-sm text-muted-foreground mb-1">Общий баланс</p>
