@@ -6,7 +6,6 @@ import {
   History,
   Info,
   CreditCard,
-  Share2,
   FileText,
   Settings,
 } from "lucide-react";
@@ -46,6 +45,16 @@ const accounts = [
     color: "bg-gradient-to-r from-finance-green to-finance-blue",
     type: "account",
   },
+  {
+    id: "3",
+    name: "Кредитная карта",
+    bankName: "Т-Банк",
+    balance: 45000,
+    currency: "₽",
+    lastDigits: "1234",
+    color: "bg-gradient-to-r from-finance-yellow to-finance-red",
+    type: "card",
+  },
 ];
 
 export default function AccountDetail() {
@@ -74,15 +83,21 @@ export default function AccountDetail() {
 
   const handlers = useSwipeable({
     onSwipedLeft: () => {
-      // Не обрабатываем свайп, если это последняя карта
       if (currentIndex < accounts.length - 1) {
+        // Переход к следующей карте
         goToAccount(currentIndex + 1);
+      } else {
+        // Если последняя карта - возврат в список
+        navigate("/accounts");
       }
     },
     onSwipedRight: () => {
-      // Не обрабатываем свайп, если это первая карта
       if (currentIndex > 0) {
+        // Переход к предыдущей карте
         goToAccount(currentIndex - 1);
+      } else {
+        // Если первая карта - возврат в список
+        navigate("/accounts");
       }
     },
     trackMouse: true,
@@ -107,7 +122,7 @@ export default function AccountDetail() {
       }`}
     >
       {/* Header */}
-      <div className="p-4 pt-20 h-[280px]">
+      <div className="p-4 pt-4 h-[240px]">
         <Button
           variant="ghost"
           size="icon"
@@ -142,12 +157,14 @@ export default function AccountDetail() {
       {/* Card Visual - with animation and dark theme */}
       <div
         key={account.id}
-        className="absolute top-36 right-[-30px] animate-fly-in-tilt"
+        className="absolute top-20 right-[-30px] animate-fly-in-tilt"
       >
         <div
           className={`${
             account.type === "card"
-              ? "bg-red-600"
+              ? account.bankName === "Т-Банк"
+                ? "bg-gradient-to-br from-yellow-400 to-black"
+                : "bg-red-600"
               : "bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C]"
           } rounded-lg w-32 h-40 flex flex-col justify-between p-3 shadow-lg overflow-hidden relative`}
         >
@@ -159,6 +176,10 @@ export default function AccountDetail() {
                 alt="Card Logo"
                 className="w-16 h-auto object-contain"
               />
+            ) : account.bankName === "Т-Банк" ? (
+              <div className="pl-3 text-black">
+                <div className="text-2xl font-bold leading-tight mt-[-16px]">T</div>
+              </div>
             ) : (
               <div className="pl-3 text-black">
                 <div className="text-2xl font-bold leading-tight mt-[-16px]">A</div>
@@ -175,8 +196,12 @@ export default function AccountDetail() {
           </div>
 
           {/* Decorative Elements */}
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-red-500/20 blur-xl"></div>
-          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-red-600/10 blur-xl"></div>
+          <div className={`absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-xl ${
+            account.bankName === "Т-Банк" ? "bg-yellow-400/20" : "bg-red-500/20"
+          }`}></div>
+          <div className={`absolute -top-10 -right-10 w-28 h-28 rounded-full blur-xl ${
+            account.bankName === "Т-Банк" ? "bg-yellow-500/10" : "bg-red-600/10"
+          }`}></div>
         </div>
       </div>
 
@@ -201,7 +226,10 @@ export default function AccountDetail() {
         <div className="space-y-2">
           <button
             className="account-action-btn"
-            onClick={() => navigate('/transactions')}
+            onClick={() => {
+              const accountName = `${account.bankName} •${cardNumber}`;
+              navigate(`/transactions?account=${encodeURIComponent(accountName)}`);
+            }}
           >
             <History className="text-muted-foreground" size={20} />
             <span className="ml-4">История операций</span>
@@ -217,18 +245,12 @@ export default function AccountDetail() {
             <span className="ml-4">Добавить карту к счёту</span>
           </button>
 
-          <button className="account-action-btn">
-            <Share2 className="text-muted-foreground" size={20} />
-            <span className="ml-4">Поделиться счётом</span>
-          </button>
-
           <div className="account-action-btn">
             <FileText className="text-muted-foreground" size={20} />
             <div className="ml-4">
               <div>Открыть реквизиты</div>
               <div className="text-muted-foreground text-sm">
-                Текущий счёт •
-                {accountNumber.substring(accountNumber.length - 4)}
+                Текущий счёт •{cardNumber}
               </div>
             </div>
           </div>

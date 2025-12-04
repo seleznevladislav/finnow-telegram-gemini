@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, Search, Filter, Calendar, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TransactionItem from "@/components/TransactionItem";
@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function Transactions() {
   const navigate = useNavigate();
-  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const accountFilter = searchParams.get('account') || 'all';
+
   // Sample transaction data grouped by date
-  const transactionsByDate = [
+  const allTransactionsByDate = [
     {
       date: "12 апреля 2025",
       transactions: [
@@ -19,7 +21,7 @@ export default function Transactions() {
           title: "Супермаркет Перекресток",
           amount: 2450,
           currency: "₽",
-          date: new Date(2025, 3, 12), // April 12, 2025
+          date: new Date(2025, 3, 12),
           category: "Продукты",
           type: "expense" as const,
           account: "Альфа-Банк •4567"
@@ -33,6 +35,26 @@ export default function Transactions() {
           category: "Транспорт",
           type: "expense" as const,
           account: "Альфа-Банк •4567"
+        },
+        {
+          id: "t7",
+          title: "Аптека 36.6",
+          amount: 890,
+          currency: "₽",
+          date: new Date(2025, 3, 12),
+          category: "Здоровье",
+          type: "expense" as const,
+          account: "Сбербанк •3151"
+        },
+        {
+          id: "t8",
+          title: "Яндекс Такси",
+          amount: 450,
+          currency: "₽",
+          date: new Date(2025, 3, 12),
+          category: "Транспорт",
+          type: "expense" as const,
+          account: "Т-Банк •1234"
         }
       ]
     },
@@ -58,6 +80,26 @@ export default function Transactions() {
           category: "Подписки",
           type: "expense" as const,
           account: "Т-Банк •1234"
+        },
+        {
+          id: "t9",
+          title: "Ozon",
+          amount: 3200,
+          currency: "₽",
+          date: new Date(2025, 3, 11),
+          category: "Покупки",
+          type: "expense" as const,
+          account: "Сбербанк •3151"
+        },
+        {
+          id: "t10",
+          title: "Магазин Пятёрочка",
+          amount: 780,
+          currency: "₽",
+          date: new Date(2025, 3, 11),
+          category: "Продукты",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
         }
       ]
     },
@@ -72,7 +114,7 @@ export default function Transactions() {
           date: new Date(2025, 3, 10),
           category: "Пополнения",
           type: "income" as const,
-          account: "Сбербанк •7890"
+          account: "Сбербанк •3151"
         },
         {
           id: "t6",
@@ -82,11 +124,103 @@ export default function Transactions() {
           date: new Date(2025, 3, 10),
           category: "Переводы",
           type: "transfer" as const,
-          account: "Сбербанк •7890"
+          account: "Сбербанк •3151"
+        },
+        {
+          id: "t11",
+          title: "ВкусВилл",
+          amount: 1450,
+          currency: "₽",
+          date: new Date(2025, 3, 10),
+          category: "Продукты",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
+        }
+      ]
+    },
+    {
+      date: "9 апреля 2025",
+      transactions: [
+        {
+          id: "t12",
+          title: "Кинотеатр Синема Парк",
+          amount: 1200,
+          currency: "₽",
+          date: new Date(2025, 3, 9),
+          category: "Развлечения",
+          type: "expense" as const,
+          account: "Т-Банк •1234"
+        },
+        {
+          id: "t13",
+          title: "Макдоналдс",
+          amount: 650,
+          currency: "₽",
+          date: new Date(2025, 3, 9),
+          category: "Рестораны",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
+        },
+        {
+          id: "t14",
+          title: "Wildberries",
+          amount: 2890,
+          currency: "₽",
+          date: new Date(2025, 3, 9),
+          category: "Покупки",
+          type: "expense" as const,
+          account: "Сбербанк •3151"
+        }
+      ]
+    },
+    {
+      date: "8 апреля 2025",
+      transactions: [
+        {
+          id: "t15",
+          title: "Spotify Premium",
+          amount: 269,
+          currency: "₽",
+          date: new Date(2025, 3, 8),
+          category: "Подписки",
+          type: "expense" as const,
+          account: "Т-Банк •1234"
+        },
+        {
+          id: "t16",
+          title: "Лента",
+          amount: 3240,
+          currency: "₽",
+          date: new Date(2025, 3, 8),
+          category: "Продукты",
+          type: "expense" as const,
+          account: "Альфа-Банк •4567"
+        },
+        {
+          id: "t17",
+          title: "Перевод от друга",
+          amount: 5000,
+          currency: "₽",
+          date: new Date(2025, 3, 8),
+          category: "Переводы",
+          type: "income" as const,
+          account: "Сбербанк •3151"
         }
       ]
     }
   ];
+
+  // Фильтрация транзакций по выбранному счёту
+  const transactionsByDate = useMemo(() => {
+    if (accountFilter === 'all') {
+      return allTransactionsByDate;
+    }
+
+    return allTransactionsByDate.map(group => ({
+      ...group,
+      transactions: group.transactions.filter(t => t.account === accountFilter)
+    })).filter(group => group.transactions.length > 0);
+  }, [accountFilter]);
   
   return (
     <div className="pb-20">
@@ -101,7 +235,12 @@ export default function Transactions() {
           >
             <ChevronLeft size={18} />
           </Button>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-finance-blue to-finance-purple bg-clip-text text-transparent drop-shadow-sm">История операций</h1>
+          <div>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-finance-blue to-finance-purple bg-clip-text text-transparent drop-shadow-sm">История операций</h1>
+            {accountFilter !== 'all' && (
+              <p className="text-xs text-muted-foreground">{accountFilter}</p>
+            )}
+          </div>
         </div>
         <Button
           variant="ghost"
@@ -149,15 +288,24 @@ export default function Transactions() {
           
           {/* Account Filter */}
           <div className="mb-4">
-            <Select defaultValue="all">
+            <Select
+              value={accountFilter}
+              onValueChange={(value) => {
+                if (value === 'all') {
+                  setSearchParams({});
+                } else {
+                  setSearchParams({ account: value });
+                }
+              }}
+            >
               <SelectTrigger className="neumorph">
                 <SelectValue placeholder="Выберите счет" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все счета</SelectItem>
-                <SelectItem value="1">Альфа-Банк •4567</SelectItem>
-                <SelectItem value="2">Сбербанк •7890</SelectItem>
-                <SelectItem value="3">Альфа-Банк •1234</SelectItem>
+                <SelectItem value="Альфа-Банк •4567">Альфа-Банк •4567</SelectItem>
+                <SelectItem value="Сбербанк •3151">Сбербанк •3151</SelectItem>
+                <SelectItem value="Т-Банк •1234">Т-Банк •1234</SelectItem>
               </SelectContent>
             </Select>
           </div>
