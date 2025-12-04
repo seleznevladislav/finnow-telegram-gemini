@@ -164,10 +164,9 @@ export default function Chat() {
   return (
     <div className="flex flex-col min-h-screen max-h-screen">
       {/* Header */}
-      <div className="flex-shrink-0 sticky top-0 z-30 bg-background px-4 pt-20 pb-3 flex items-center justify-between border-b border-border">
+      <div className="flex-shrink-0 sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-4 pt-2 pb-3 flex items-center justify-between relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-finance-purple/20 after:via-finance-blue/40 after:to-finance-purple/20">
         <div className="flex items-center">
-          <Sparkles size={20} className="text-finance-purple mr-2" />
-          <h1 className="text-xl font-semibold">AI Помощник</h1>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-finance-purple to-finance-blue bg-clip-text text-transparent drop-shadow-sm">AI Помощник</h1>
         </div>
       </div>
 

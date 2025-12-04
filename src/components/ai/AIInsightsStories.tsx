@@ -291,7 +291,7 @@ export default function AIInsightsStories({
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-bold text-white drop-shadow-lg">
                 Персональные инсайты
               </h2>
               <p className="text-xs text-white/70">
