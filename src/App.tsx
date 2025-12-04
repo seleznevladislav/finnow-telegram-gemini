@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
@@ -13,15 +13,104 @@ import Transactions from "./pages/Transactions";
 import Analytics from "./pages/Analytics";
 import Chat from "./pages/Chat";
 import Investments from "./pages/Investments";
+import Auth from "./pages/Auth";
 import BottomNavigation from "./components/BottomNavigation";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { useTelegram } from "./hooks/useTelegram";
 import { logUserLogin, createLoginEvent } from "./services/logger";
 import { InvestmentProvider } from "./contexts/InvestmentContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
+function NavigationWrapper() {
+  const location = useLocation();
+  const shouldShowNavigation = location.pathname !== '/auth';
+
+  if (!shouldShowNavigation) return null;
+  return <BottomNavigation />;
+}
+
+function AppContent() {
+  const location = useLocation();
+  const { isMobile } = useTelegram();
+  const isAuthPage = location.pathname === '/auth';
+
+  return (
+    <div className={`max-w-md mx-auto min-h-screen ${isAuthPage ? '' : 'pb-16 routeContainer'} ${isMobile && !isAuthPage ? 'pt-20' : ''}`}>
+      <Routes>
+        {/* Auth Route - доступен без авторизации */}
+        <Route path="/auth" element={<Auth />} />
+
+        {/* Protected Routes - требуют авторизацию */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts"
+          element={
+            <ProtectedRoute>
+              <Accounts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts/:id"
+          element={
+            <ProtectedRoute>
+              <AccountDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investments"
+          element={
+            <ProtectedRoute>
+              <Investments />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Add redirects for invalid routes */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <NavigationWrapper />
+    </div>
+  );
+}
+
 const App = () => {
-  const { isMobile, TG, user, platform } = useTelegram();
+  const { TG, user, platform, isMobile } = useTelegram();
 
   useEffect(() => {
     // Отключаем вертикальные свайпы, чтобы приложение не закрывалось при свайпе вниз
@@ -54,30 +143,17 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <InvestmentProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className={`max-w-md mx-auto min-h-screen pb-16 routeContainer ${isMobile ? 'pt-20' : ''}`}>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/accounts" element={<Accounts />} />
-                <Route path="/accounts/:id" element={<AccountDetail />} />
-                <Route path="/transactions" element={<Transactions />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/investments" element={<Investments />} />
-
-                {/* Add redirects for invalid routes */}
-                <Route path="/404" element={<NotFound />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-              <BottomNavigation />
-            </div>
-          </BrowserRouter>
-        </TooltipProvider>
-      </InvestmentProvider>
+      <AuthProvider>
+        <InvestmentProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </InvestmentProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
