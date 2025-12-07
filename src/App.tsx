@@ -36,6 +36,11 @@ function AppContent() {
   const { isMobile } = useTelegram();
   const isAuthPage = location.pathname === '/auth';
 
+  // Автоматически скроллим вверх при переходе на новую страницу
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
   return (
     <div className={`max-w-md mx-auto min-h-screen ${isAuthPage ? '' : 'pb-16 routeContainer'} ${isMobile && !isAuthPage ? 'pt-20' : ''}`}>
       <Routes>

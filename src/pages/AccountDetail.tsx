@@ -65,6 +65,9 @@ export default function AccountDetail() {
   const [account, setAccount] = useState<Account | null>(null);
 
   useEffect(() => {
+    // Скроллим страницу вверх при открытии
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
     const found = accounts.find((a) => a.id === id);
     if (found) setAccount(found);
     else navigate("/accounts");
