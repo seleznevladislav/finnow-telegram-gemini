@@ -20,6 +20,7 @@ import { useTelegram } from "./hooks/useTelegram";
 import { logUserLogin, createLoginEvent } from "./services/logger";
 import { InvestmentProvider } from "./contexts/InvestmentContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { TransactionProvider } from "./contexts/TransactionContext";
 
 const queryClient = new QueryClient();
 
@@ -149,15 +150,17 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <InvestmentProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          </TooltipProvider>
-        </InvestmentProvider>
+        <TransactionProvider>
+          <InvestmentProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </TooltipProvider>
+          </InvestmentProvider>
+        </TransactionProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

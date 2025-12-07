@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CSVImportExport from "@/components/CSVImportExport";
 import {
   PieChart as RechartsPieChart,
   Pie,
@@ -28,6 +29,8 @@ import {
   ResponsiveContainer,
   LineChart as RechartsLineChart,
   Line,
+  AreaChart,
+  Area,
 } from "recharts";
 
 export default function Analytics() {
@@ -182,14 +185,17 @@ export default function Analytics() {
               Год
             </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            <Download size={14} />
-            Отчет
-          </Button>
+          <div className="flex gap-2">
+            <CSVImportExport />
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              <Download size={14} />
+              Отчет
+            </Button>
+          </div>
         </div>
 
         {/* Summary Cards */}
@@ -279,27 +285,33 @@ export default function Analytics() {
                       data={expensesByCategory}
                       cx="50%"
                       cy="50%"
-                      outerRadius={80}
+                      innerRadius={55}
+                      outerRadius={85}
+                      paddingAngle={3}
                       dataKey="value"
                       label={false}
-                      isAnimationActive={true}
+                      animationBegin={0}
+                      animationDuration={800}
                     >
                       {expensesByCategory.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={entry.color}
-                          stroke="none"
+                          stroke="#fff"
+                          strokeWidth={2}
                         />
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value) => `${value.toLocaleString()} ₽`}
+                      formatter={(value) => [`${value.toLocaleString()} ₽`, 'Сумма']}
                       contentStyle={{
-                        backgroundColor: "#FFFFFF",
-                        borderRadius: "8px",
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
                         border: "none",
-                        color: "#fff",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        padding: "12px",
                       }}
+                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
                     />
                   </RechartsPieChart>
                 </ResponsiveContainer>
@@ -332,26 +344,48 @@ export default function Analytics() {
               <h3 className="font-medium mb-3">Динамика расходов</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsLineChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis />
-                    <Tooltip
-                      formatter={(value) => `${value.toLocaleString()} ₽`}
-					  contentStyle={{
-                        backgroundColor: "#FFFFFF",
-                        borderRadius: "8px",
-                        border: "none",
-                        color: "#fff",
-                      }}
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.3} />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
                     />
-                    <Line
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      formatter={(value) => [`${value.toLocaleString()} ₽`, 'Расходы']}
+                      contentStyle={{
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        padding: "12px",
+                      }}
+                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+                      itemStyle={{ color: '#EF4444', fontWeight: 500 }}
+                    />
+                    <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="#4F6AF0"
-                      activeDot={{ r: 6 }}
+                      stroke="#EF4444"
+                      strokeWidth={3}
+                      fill="url(#expenseGradient)"
+                      dot={false}
+                      activeDot={{ r: 6, fill: '#EF4444', strokeWidth: 2, stroke: '#fff' }}
+                      animationDuration={1000}
                     />
-                  </RechartsLineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -364,13 +398,42 @@ export default function Analytics() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip
-                      formatter={(value) => `${value.toLocaleString()} ₽`}
+                    <defs>
+                      <linearGradient id="incomeBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10B981" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#10B981" stopOpacity={0.7}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.3} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
                     />
-                    <Bar dataKey="доходы" fill="#10B981" />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      formatter={(value) => [`${value.toLocaleString()} ₽`, 'Доход']}
+                      contentStyle={{
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        padding: "12px",
+                      }}
+                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+                      itemStyle={{ color: '#10B981', fontWeight: 500 }}
+                    />
+                    <Bar
+                      dataKey="доходы"
+                      fill="url(#incomeBarGradient)"
+                      radius={[8, 8, 0, 0]}
+                      animationDuration={800}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -393,15 +456,56 @@ export default function Analytics() {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <defs>
+                      <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10B981" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#10B981" stopOpacity={0.7}/>
+                      </linearGradient>
+                      <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#EF4444" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#EF4444" stopOpacity={0.7}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.3} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
+                    />
                     <Tooltip
                       formatter={(value) => `${value.toLocaleString()} ₽`}
+                      contentStyle={{
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        padding: "12px",
+                      }}
+                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
                     />
-                    <Legend />
-                    <Bar dataKey="доходы" fill="#10B981" />
-                    <Bar dataKey="расходы" fill="#EF4444" />
+                    <Legend
+                      wrapperStyle={{ paddingTop: '10px' }}
+                      iconType="circle"
+                    />
+                    <Bar
+                      dataKey="доходы"
+                      fill="url(#incomeGradient)"
+                      radius={[8, 8, 0, 0]}
+                      animationDuration={800}
+                    />
+                    <Bar
+                      dataKey="расходы"
+                      fill="url(#expensesGradient)"
+                      radius={[8, 8, 0, 0]}
+                      animationDuration={800}
+                      animationBegin={400}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

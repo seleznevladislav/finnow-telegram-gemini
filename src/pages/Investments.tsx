@@ -19,6 +19,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  Area,
+  AreaChart,
 } from "recharts";
 
 export default function Investments() {
@@ -306,14 +308,31 @@ export default function Investments() {
                       cy="50%"
                       innerRadius={50}
                       outerRadius={80}
-                      paddingAngle={2}
+                      paddingAngle={3}
                       dataKey="value"
+                      animationBegin={0}
+                      animationDuration={800}
                     >
                       {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="#fff"
+                          strokeWidth={2}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
+                    <Tooltip
+                      formatter={(value) => [`${value}%`, 'Доля']}
+                      contentStyle={{
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        padding: "12px",
+                      }}
+                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -402,34 +421,50 @@ export default function Investments() {
               </div>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={profitData}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                  <AreaChart data={profitData}>
+                    <defs>
+                      <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.3} />
                     <XAxis
                       dataKey="month"
-                      tick={{ fontSize: 10 }}
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
                       interval={chartPeriod === 'month' ? 1 : chartPeriod === 'year' ? 0 : 3}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
                     />
                     <YAxis
-                      tick={{ fontSize: 10 }}
+                      tick={{ fontSize: 11, fill: '#9ca3af' }}
                       tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickLine={false}
                     />
                     <Tooltip
-                      formatter={(value) => `${value.toLocaleString()} ₽`}
+                      formatter={(value) => [`${value.toLocaleString()} ₽`, 'Стоимость']}
                       contentStyle={{
-                        backgroundColor: "#FFFFFF",
-                        borderRadius: "8px",
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
                         border: "none",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        padding: "12px",
                       }}
+                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+                      itemStyle={{ color: '#10B981', fontWeight: 500 }}
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="value"
                       stroke="#10B981"
-                      strokeWidth={2}
+                      strokeWidth={3}
+                      fill="url(#profitGradient)"
                       dot={false}
-                      activeDot={{ r: 4 }}
+                      activeDot={{ r: 6, fill: '#10B981', strokeWidth: 2, stroke: '#fff' }}
+                      animationDuration={1000}
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
               <div className="mt-2 space-y-1">
