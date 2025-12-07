@@ -107,6 +107,32 @@ export default function Analytics() {
     0
   );
 
+  // Вычисляем суммы доходов и расходов в зависимости от периода
+  const getPeriodTotals = () => {
+    if (period === "week") {
+      const expenses = weekData.reduce((sum, item) => sum + item.value, 0);
+      const income = expenses * 2.5; // Примерное соотношение
+      return { expenses, income };
+    } else if (period === "month") {
+      const expenses = monthData.reduce((sum, item) => sum + item.расходы, 0);
+      const income = monthData.reduce((sum, item) => sum + item.доходы, 0);
+      return { expenses, income };
+    } else {
+      const expenses = yearData.reduce((sum, item) => sum + item.расходы, 0);
+      const income = yearData.reduce((sum, item) => sum + item.доходы, 0);
+      return { expenses, income };
+    }
+  };
+
+  const periodTotals = getPeriodTotals();
+
+  // Форматируем текст периода для отображения
+  const getPeriodLabel = () => {
+    if (period === "week") return "недели";
+    if (period === "month") return "месяца";
+    return "года";
+  };
+
   return (
     <div className="pb-20">
       {/* Header */}
@@ -169,19 +195,21 @@ export default function Analytics() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="neumorph p-4">
-            <p className="text-xs text-muted-foreground">Расходы</p>
+            <p className="text-xs text-muted-foreground">Расходы за {getPeriodLabel()}</p>
             <p className="text-lg font-semibold">
-              {totalExpenses.toLocaleString()} ₽
+              {periodTotals.expenses.toLocaleString()} ₽
             </p>
             <p className="text-xs text-finance-red mt-1">
-              +8.2% с прошлого месяца
+              {period === "week" ? "+12.5% с прошлой недели" : period === "month" ? "+8.2% с прошлого месяца" : "+5.3% с прошлого года"}
             </p>
           </div>
           <div className="neumorph p-4">
-            <p className="text-xs text-muted-foreground">Доходы</p>
-            <p className="text-lg font-semibold">85,000 ₽</p>
+            <p className="text-xs text-muted-foreground">Доходы за {getPeriodLabel()}</p>
+            <p className="text-lg font-semibold">
+              {periodTotals.income.toLocaleString()} ₽
+            </p>
             <p className="text-xs text-finance-green mt-1">
-              +0% с прошлого месяца
+              {period === "week" ? "+5.0% с прошлой недели" : period === "month" ? "+0% с прошлого месяца" : "+8.2% с прошлого года"}
             </p>
           </div>
         </div>

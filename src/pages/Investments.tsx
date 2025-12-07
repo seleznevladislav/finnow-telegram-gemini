@@ -35,6 +35,7 @@ export default function Investments() {
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<RiskLevel | null>(riskLevel);
+  const [chartPeriod, setChartPeriod] = useState<'month' | 'year' | 'all'>('month');
 
   // Автоматическая генерация плана при выборе риска
   useEffect(() => {
@@ -68,14 +69,22 @@ export default function Investments() {
   };
 
   // Данные для графика прогноза
-  const profitData = investmentPlan ? Array.from({ length: 25 }, (_, i) => {
-    const month = i;
-    const monthlyProfit = (investmentPlan.totalAmount * (investmentPlan.expectedYield / 100) / 12) * month;
-    return {
-      month: `${month}м`,
-      value: Math.floor(investmentPlan.totalAmount + monthlyProfit),
-    };
-  }) : [];
+  const profitData = investmentPlan ? (() => {
+    const periods = chartPeriod === 'month' ? 12 : chartPeriod === 'year' ? 5 : 25;
+    const isMonthly = chartPeriod === 'month';
+    const isYearly = chartPeriod === 'year';
+
+    return Array.from({ length: periods + 1 }, (_, i) => {
+      const timeValue = isMonthly ? i : isYearly ? i : i;
+      const profitMultiplier = isMonthly ? i / 12 : isYearly ? i : i / 12;
+      const profit = investmentPlan.totalAmount * (investmentPlan.expectedYield / 100) * profitMultiplier;
+
+      return {
+        month: isMonthly ? `${i}м` : isYearly ? `${i}г` : `${i}м`,
+        value: Math.floor(investmentPlan.totalAmount + profit),
+      };
+    });
+  })() : [];
 
   // Данные для pie chart (распределение)
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
@@ -358,9 +367,38 @@ export default function Investments() {
             <div className="neumorph p-5 rounded-xl">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Прогноз доходности</h3>
-                <span className="text-xs text-muted-foreground">
-                  {investmentPlan.timeframe}
-                </span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setChartPeriod('month')}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                      chartPeriod === 'month'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    Месяц
+                  </button>
+                  <button
+                    onClick={() => setChartPeriod('year')}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                      chartPeriod === 'year'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    Год
+                  </button>
+                  <button
+                    onClick={() => setChartPeriod('all')}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                      chartPeriod === 'all'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    Все
+                  </button>
+                </div>
               </div>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -369,7 +407,7 @@ export default function Investments() {
                     <XAxis
                       dataKey="month"
                       tick={{ fontSize: 10 }}
-                      interval={3}
+                      interval={chartPeriod === 'month' ? 1 : chartPeriod === 'year' ? 0 : 3}
                     />
                     <YAxis
                       tick={{ fontSize: 10 }}
@@ -394,9 +432,14 @@ export default function Investments() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                * Прогноз не является гарантией доходности
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-muted-foreground text-center">
+                  * Прогноз на {chartPeriod === 'month' ? '12 месяцев' : chartPeriod === 'year' ? '5 лет' : '25 месяцев'}
+                </p>
+                <p className="text-xs text-muted-foreground text-center">
+                  Прогноз не является гарантией доходности
+                </p>
+              </div>
             </div>
 
             {/* Действия */}

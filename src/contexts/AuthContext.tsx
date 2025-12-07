@@ -43,9 +43,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     checkBiometrics();
 
-    // Сбрасываем авторизацию при загрузке (для безопасности)
-    localStorage.removeItem(STORAGE_KEY_AUTH);
-    setIsAuthenticated(false);
+    // Проверяем авторизацию в текущей сессии (sessionStorage)
+    // Это безопасно: авторизация сбрасывается при закрытии вкладки,
+    // но сохраняется при обновлении страницы
+    const sessionAuth = sessionStorage.getItem(STORAGE_KEY_AUTH);
+    if (sessionAuth === "true") {
+      setIsAuthenticated(true);
+    } else {
+      // Сбрасываем авторизацию только если не было сессии
+      localStorage.removeItem(STORAGE_KEY_AUTH);
+      setIsAuthenticated(false);
+    }
   }, []);
 
   const login = (pin: string): boolean => {
@@ -53,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedPin === pin) {
       setIsAuthenticated(true);
       localStorage.setItem(STORAGE_KEY_AUTH, "true");
+      sessionStorage.setItem(STORAGE_KEY_AUTH, "true");
       return true;
     }
     return false;
@@ -66,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => {
           setIsAuthenticated(true);
           localStorage.setItem(STORAGE_KEY_AUTH, "true");
+          sessionStorage.setItem(STORAGE_KEY_AUTH, "true");
           resolve(true);
         }, 1000);
       });
@@ -78,11 +88,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem(STORAGE_KEY_AUTH);
+    sessionStorage.removeItem(STORAGE_KEY_AUTH);
   };
 
   const setupPin = (pin: string) => {
     localStorage.setItem(STORAGE_KEY_PIN, pin);
     localStorage.setItem(STORAGE_KEY_BIOMETRICS, "true");
+    localStorage.setItem(STORAGE_KEY_AUTH, "true");
+    sessionStorage.setItem(STORAGE_KEY_AUTH, "true");
     setHasPin(true);
     setHasBiometrics(true);
     setIsAuthenticated(true);
