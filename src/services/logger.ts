@@ -44,6 +44,13 @@ export async function logUserLogin(event: UserLoginEvent): Promise<void> {
   });
 
   try {
+    console.log('🚀 Начинаем отправку запроса:', {
+      url: googleScriptUrl,
+      method: 'POST',
+      payloadSize: JSON.stringify(payload).length,
+      payload: payload,
+    });
+
     const response = await fetch(googleScriptUrl, {
       method: 'POST',
       mode: 'no-cors', // Google Apps Script требует no-cors mode
@@ -59,12 +66,15 @@ export async function logUserLogin(event: UserLoginEvent): Promise<void> {
       username: event.username,
       timestamp: event.timestamp,
       platform: event.platform,
+      type: payload.type,
     });
+    console.log('📊 Полный payload, отправленный в Google Sheets:', payload);
   } catch (error) {
     console.error('❌ Ошибка отправки лога:', error);
     console.error('📋 Детали ошибки:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       name: error instanceof Error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
     });
     // Не пробрасываем ошибку дальше, чтобы не ломать UX
   }
