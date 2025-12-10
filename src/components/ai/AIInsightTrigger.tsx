@@ -1,5 +1,6 @@
 import { Sparkles, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { logAIInsightShown, logAIInsightClicked } from "@/lib/analytics";
 
 interface AIInsightTriggerProps {
   savingsAmount: number;
@@ -14,10 +15,21 @@ export default function AIInsightTrigger({
 }: AIInsightTriggerProps) {
   const [isHovered, setIsHovered] = useState(false);
 
+  // Логируем показ компонента при монтировании (для AB теста)
+  useEffect(() => {
+    logAIInsightShown();
+  }, []);
+
+  // Обработчик клика с логированием
+  const handleClick = () => {
+    logAIInsightClicked();
+    onClick?.();
+  };
+
   return (
     <div
       className="relative overflow-hidden neumorph rounded-xl cursor-pointer group p-4"
-      onClick={onClick}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

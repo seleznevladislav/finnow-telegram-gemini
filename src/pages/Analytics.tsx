@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   PieChart,
@@ -12,6 +12,7 @@ import {
   Receipt,
   ShieldCheck,
 } from "lucide-react";
+import { logAnalyticsModuleVisited } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CSVImportExport from "@/components/CSVImportExport";
@@ -35,6 +36,11 @@ import {
 
 export default function Analytics() {
   const [period, setPeriod] = useState("month");
+
+  // Логируем посещение модуля Аналитики для AB теста
+  useEffect(() => {
+    logAnalyticsModuleVisited();
+  }, []);
 
   // Sample expense data by category
   const expensesByCategory = [

@@ -8,6 +8,7 @@ import AddFundsDialog from "@/components/investments/AddFundsDialog";
 import { generateInvestmentPlan } from "@/services/ai";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { logInvestmentsModuleVisited } from "@/lib/analytics";
 import {
   LineChart,
   Line,
@@ -38,6 +39,11 @@ export default function Investments() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<RiskLevel | null>(riskLevel);
   const [chartPeriod, setChartPeriod] = useState<'month' | 'year' | 'all'>('month');
+
+  // Логируем посещение модуля Инвестиций для AB теста
+  useEffect(() => {
+    logInvestmentsModuleVisited();
+  }, []);
 
   // Автоматическая генерация плана при выборе риска
   useEffect(() => {
