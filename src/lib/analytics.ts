@@ -4,6 +4,7 @@
  */
 
 import WebApp from "@twa-dev/sdk";
+import { getABTestVariant, ABTestVariant } from "./abTest";
 
 // Типы событий для AB тестирования
 export enum ABTestEvent {
@@ -24,6 +25,7 @@ interface AnalyticsEventData {
   platform?: string;
   languageCode?: string;
   isPremium: boolean;
+  abTestVariant: ABTestVariant; // Группа A/B теста
   // Дополнительные параметры для конкретных событий
   metadata?: Record<string, any>;
 }
@@ -113,10 +115,14 @@ export async function logEvent(
   const userData = getUserData();
   const timestamp = new Date().toISOString();
 
+  // Определяем группу A/B теста для пользователя
+  const abTestVariant = getABTestVariant(userData.userId);
+
   const eventData: AnalyticsEventData = {
     event,
     timestamp,
     ...userData,
+    abTestVariant,
     metadata,
   };
 

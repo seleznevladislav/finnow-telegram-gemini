@@ -22,6 +22,7 @@ import AIInsightsStories from "@/components/ai/AIInsightsStories";
 import { useTelegram } from "@/hooks/useTelegram";
 import { useInvestment } from "@/contexts/InvestmentContext";
 import { useEffect, useState } from "react";
+import { shouldShowAIInsight } from "@/lib/abTest";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -152,17 +153,19 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* AI Insight Trigger */}
-        <div className="mb-6">
-          <AIInsightTrigger
-            savingsAmount={Math.floor(totalAvailable)}
-            insightText={totalAvailable > 0
-              ? `У тебя есть ${Math.floor(totalAvailable).toLocaleString()}₽ для инвестирования — можно защитить от инфляции и получить доход`
-              : "Добавь средства для инвестирования через кнопку ниже"
-            }
-            onClick={() => totalAvailable > 0 ? setIsAISheetOpen(true) : navigate("/investments")}
-          />
-        </div>
+        {/* AI Insight Trigger - только для группы B (A/B тест) */}
+        {shouldShowAIInsight(user?.id || "unknown") && (
+          <div className="mb-6">
+            <AIInsightTrigger
+              savingsAmount={Math.floor(totalAvailable)}
+              insightText={totalAvailable > 0
+                ? `У тебя есть ${Math.floor(totalAvailable).toLocaleString()}₽ для инвестирования — можно защитить от инфляции и получить доход`
+                : "Добавь средства для инвестирования через кнопку ниже"
+              }
+              onClick={() => totalAvailable > 0 ? setIsAISheetOpen(true) : navigate("/investments")}
+            />
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-4 gap-3 mb-6">
